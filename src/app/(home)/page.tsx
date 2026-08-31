@@ -1,9 +1,12 @@
-import { Centering } from '../../components/centering';
+import { ExerciseBasket } from '../../components/ExerciseBasket';
+import { BasketBuilderProvider } from '../../context/BasketBuilder';
+import { fetchAllExerciseDefaults } from '../../lib/exercisesList';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const defaultExercises = await fetchAllExerciseDefaults();
   return (
-    <Centering>
-      <section id="home">hi, this is the home page</section>
-    </Centering>
+    <BasketBuilderProvider defaultExercises={defaultExercises}>
+      <ExerciseBasket />
+    </BasketBuilderProvider>
   );
 }

@@ -1,8 +1,8 @@
 'use client';
-
 import { PrimeReactProvider } from '@primereact/core';
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { PropsWithChildren } from 'react';
 import { ThemeProvider } from './ThemeProvider';
 
@@ -61,8 +61,10 @@ const primereactConfig = {
 
 export function Providers({ children }: PropsWithChildren) {
   return (
-    <PrimeReactProvider {...primereactConfig}>
-      <ThemeProvider>{children}</ThemeProvider>
-    </PrimeReactProvider>
+    <NuqsAdapter>
+      <PrimeReactProvider {...primereactConfig}>
+        <ThemeProvider>{children}</ThemeProvider>
+      </PrimeReactProvider>
+    </NuqsAdapter>
   );
 }
