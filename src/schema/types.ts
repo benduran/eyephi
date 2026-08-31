@@ -26,6 +26,15 @@ export const ColorSchemeSchema = z.enum([
 ]);
 export type ColorScheme = z.infer<typeof ColorSchemeSchema>;
 
+/** Shared by the model and the wire format so the bounds cannot drift apart. */
+// value is in seconds
+export const ExerciseDurationSchema = z
+  .int()
+  .min(30)
+  .max(30 * 6);
+export const ExerciseIntensitySchema = z.int().min(1).max(10);
+export const ExerciseSpeedSchema = z.int().min(1).max(10);
+
 /**
  * in case you're wondering, since we're persisting the exercise configuration to the user's
  * query string, we *don't* need a unique ID because we don't care about deduplicating.
@@ -38,14 +47,10 @@ const BaseExericseSchema = z.object({
   /** Shown while the exercise runs, phrased as an instruction to the patient. */
   cue: z.string().nonempty().nonoptional(),
   displayName: z.string().nonempty().nonoptional(),
-  // value is in seconds
-  duration: z
-    .int()
-    .min(30)
-    .max(30 * 6),
-  intensity: z.int().min(1).max(10),
+  duration: ExerciseDurationSchema,
+  intensity: ExerciseIntensitySchema,
   scheme: ColorSchemeSchema,
-  speed: z.int().min(1).max(10),
+  speed: ExerciseSpeedSchema,
   /** Clinical demand multiplier folded into the difficulty score. */
   weight: z.number().min(0.5).max(2),
 });
@@ -85,3 +90,47 @@ export type Exercise = z.infer<typeof ExerciseSchema>;
 
 export const ProgramSchema = z.array(ExerciseSchema);
 export type Program = z.infer<typeof ProgramSchema>;
+
+/** Bump when the tuple layout changes so stale links fail cleanly instead of decoding wrong. */
+export const PROGRAM_WIRE_VERSION = 1;
+
+/**
+ * Where each tuned field sits inside an encoded exercise tuple.
+ */
+export const ENCODED_EXERCISE_FIELDS = {
+  backgroundNoise: 5,
+  duration: 1,
+  intensity: 3,
+  scheme: 4,
+  speed: 2,
+  type: 0,
+} as const satisfies Record<
+  keyof Pick<
+    Exercise,
+    'backgroundNoise' | 'duration' | 'intensity' | 'scheme' | 'speed' | 'type'
+  >,
+  number
+>;
+
+/**
+ * The shape a shared link actually carries: only the knobs a patient tunes.
+ * Copy, category and weight are rehydrated from the catalogue on decode.
+ * Append new fields to the end, never reorder.
+ */
+export const EncodedExerciseSchema = z.tuple([
+  // Deliberately a loose string: a link naming a retired exercise should drop
+  // that one entry on decode, not fail the whole program.
+  z.string(),
+  ExerciseDurationSchema,
+  ExerciseSpeedSchema,
+  ExerciseIntensitySchema,
+  ColorSchemeSchema,
+  z.boolean(),
+]);
+export type EncodedExercise = z.infer<typeof EncodedExerciseSchema>;
+
+export const EncodedProgramSchema = z.tuple([
+  z.literal(PROGRAM_WIRE_VERSION),
+  z.array(EncodedExerciseSchema),
+]);
+export type EncodedProgram = z.infer<typeof EncodedProgramSchema>;

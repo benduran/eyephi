@@ -1,8 +1,14 @@
 'use client';
 
-import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
+import {
+  createParser,
+  parseAsInteger,
+  parseAsString,
+  useQueryState,
+} from 'nuqs';
 import type { PropsWithChildren } from 'react';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+import { decodeProgram, encodeExerciseProgram } from '../lib/programCodec';
 import type { Exercise, Nullish } from '../schema/types';
 
 type BasketBuilderContextVal = {
@@ -33,6 +39,21 @@ export function BasketBuilderProvider({
   children,
   defaultExercises,
 }: BasketBuilderProviderProps) {
+  /** parsers */
+  const programParser = useMemo(
+    () =>
+      createParser<Exercise[]>({
+        // Serialising both sides is how nuqs knows the program is back to empty
+        // and can drop the key from the URL entirely.
+        eq: (a, b) => encodeExerciseProgram(a) === encodeExerciseProgram(b),
+        parse: (queryValue) => decodeProgram(queryValue, defaultExercises),
+        serialize: encodeExerciseProgram,
+      })
+        .withDefault([])
+        .withOptions({ shallow: true }),
+    [defaultExercises],
+  );
+
   /** hooks */
   const [adding, setAdding] = useQueryState(
     'adding',
@@ -42,9 +63,7 @@ export function BasketBuilderProvider({
     'editing',
     parseAsInteger.withOptions({ shallow: true }),
   );
-
-  /** state */
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [exercises, setExercises] = useQueryState('program', programParser);
 
   /** provider val */
   const providerVal = useMemo<BasketBuilderContextVal>(
@@ -63,7 +82,15 @@ export function BasketBuilderProvider({
       },
       setEditing,
     }),
-    [adding, editing, exercises, defaultExercises, setAdding, setEditing],
+    [
+      adding,
+      editing,
+      exercises,
+      defaultExercises,
+      setAdding,
+      setEditing,
+      setExercises,
+    ],
   );
 
   return <context.Provider value={providerVal}>{children}</context.Provider>;
