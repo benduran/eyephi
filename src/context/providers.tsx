@@ -26,6 +26,18 @@ const neutralRamp = {
 };
 
 const EyePhiPreset = definePreset(Aura, {
+  components: {
+    // Aura cycles this spinner red/blue/green/yellow over 6s, which is exactly
+    // the visual noise the monochrome rule above exists to avoid.
+    progressspinner: {
+      root: {
+        colorFour: '{primary.color}',
+        colorOne: '{primary.color}',
+        colorThree: '{primary.color}',
+        colorTwo: '{primary.color}',
+      },
+    },
+  },
   semantic: {
     primary: {
       ...neutralRamp,

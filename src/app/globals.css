@@ -49,7 +49,10 @@
  * picks the right one off the color-scheme resolved above.
  */
 :root {
-  --background: light-dark(var(--p-surface-50, #fafafa), var(--p-surface-950, #0a0a0a));
+  --background: light-dark(
+    var(--p-surface-50, #fafafa),
+    var(--p-surface-950, #0a0a0a)
+  );
   --foreground: var(--p-text-color, light-dark(#171717, #fafafa));
 }
 

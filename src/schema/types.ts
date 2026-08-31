@@ -6,8 +6,8 @@ export const ThemeSchema = z.enum(['dark', 'light']).default('light');
 export type Theme = 'dark' | 'light';
 
 export const ProgramProgressViewSchema = z.object({
-  elapsed: z.int().min(0).max(100),
-  progress: z.int().min(0).max(100),
+  elapsed: z.int().min(0),
+  total: z.int().min(0),
 });
 export type ProgramProgressView = z.infer<typeof ProgramProgressViewSchema>;
 

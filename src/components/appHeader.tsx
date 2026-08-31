@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@primereact/ui/button';
+import { formatDuration, toPercentage } from '../lib/format';
 import type { Nullish, ProgramProgressView } from '../schema/types';
 import { Centering } from './centering';
 import { EyePhiLogo } from './eyePhiLogo';
@@ -42,15 +43,15 @@ export function AppHeader({
             {progress && (
               <div className="hidden w-full max-w-130 items-center gap-3 wide:flex">
                 <span className="font-mono text-xs tracking-wide text-surface-600 dark:text-surface-400">
-                  {progress.elapsedLabel}
+                  {formatDuration(progress.elapsed)}
                 </span>
                 <ProgressMeter
                   ariaLabel="Program progress"
                   className="flex-1"
-                  value={progress.progressPct}
+                  value={toPercentage(progress.elapsed, progress.total)}
                 />
                 <span className="font-mono text-xs tracking-wide text-surface-400 dark:text-surface-500">
-                  {progress.totalTimeLabel}
+                  {formatDuration(progress.total)}
                 </span>
               </div>
             )}
@@ -83,15 +84,15 @@ export function AppHeader({
       {progress && (
         <div className="flex items-center gap-2.5 px-4 pb-2.5 wide:hidden">
           <span className="font-mono text-[11px] text-surface-600 dark:text-surface-400">
-            {progress.elapsedLabel}
+            {formatDuration(progress.elapsed)}
           </span>
           <ProgressMeter
             ariaLabel="Program progress"
             className="flex-1"
-            value={progress.progressPct}
+            value={toPercentage(progress.elapsed, progress.total)}
           />
           <span className="font-mono text-[11px] text-surface-400 dark:text-surface-500">
-            {progress.totalTimeLabel}
+            {formatDuration(progress.total)}
           </span>
         </div>
       )}

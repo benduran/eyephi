@@ -74,10 +74,6 @@ const DEFAULT_OVERRIDES = {
   },
 } satisfies Record<ExerciseType, ExerciseCopy & Partial<ExerciseTuning>>;
 
-/**
- * NOTE: `id` is positional, so reordering the table above renumbers every
- * exercise. `type` is the stable identity if you need one that survives edits.
- */
 const ALL_EXERCISES_DEFAULTS: Exercise[] = ExerciseSchema.array().parse(
   Object.entries(DEFAULT_OVERRIDES).map(([type, overrides]) => ({
     ...BASE_DEFAULTS,
