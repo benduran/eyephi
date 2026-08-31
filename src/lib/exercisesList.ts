@@ -5,8 +5,10 @@ import { ExerciseSchema } from '../schema/types';
 type ExerciseType = Exercise['type'];
 type ExerciseDefaults = Omit<Exercise, 'type'>;
 
-/** Prose that is unique per exercise, so it can never fall back to a default. */
-type ExerciseCopy = Pick<ExerciseDefaults, 'blurb' | 'displayName'>;
+type ExerciseCopy = Pick<
+  ExerciseDefaults,
+  'blurb' | 'category' | 'cue' | 'displayName' | 'weight'
+>;
 /** The knobs that mostly share one sensible starting point. */
 type ExerciseTuning = Omit<ExerciseDefaults, keyof ExerciseCopy>;
 
@@ -19,58 +21,84 @@ const BASE_DEFAULTS = {
   speed: 3,
 } satisfies ExerciseTuning;
 
-/**
- * Copy plus any per-type deviations from BASE_DEFAULTS. Every entry must carry
- * its own blurb and displayName; only the tuning knobs are optional.
- *
- * Typed as a full Record so adding a member to ExerciseSchema's union fails
- * compilation here until it gets a default.
- */
 const DEFAULT_OVERRIDES = {
-  dynamic_moving_letters: {
+  dynamic_visual_acuity: {
     blurb:
-      'Letters drift across the screen while your head keeps moving — call out each one as it becomes readable.',
-    displayName: 'Dynamic moving letters',
+      'Read the orientation of a target while your head keeps moving. The acuity drill clinicians score you on.',
+    category: 'habituation',
+    cue: 'Call out which way the gap points.',
+    displayName: 'Dynamic Visual Acuity',
     duration: 45,
+    weight: 1.1,
   },
-  optokinetic_stripes: {
+  horizontal_saccades: {
     blurb:
-      'A slow field of shapes drifts past to desensitise you to large-field motion. Stay relaxed and let it move.',
-    displayName: 'Optokinetic shapes',
-    duration: 30,
+      'Snap your gaze between two alternating targets, head still. Trains the fast jumps your eyes make between fixations.',
+    category: 'ocular_motor',
+    cue: 'Jump your gaze to each target as it appears.',
+    displayName: 'Horizontal Saccades',
+    duration: 45,
+    weight: 0.9,
   },
-  path_tracing: {
+  near_far_convergence: {
+    blurb:
+      'The target approaches and recedes. Keep it single and sharp the whole way in.',
+    category: 'ocular_motor',
+    cue: 'Keep the target single as it approaches.',
+    displayName: 'Near-Far Convergence',
+    duration: 45,
+    weight: 0.85,
+  },
+  optokinetic_stimulation: {
+    blurb:
+      'A drifting striped field that desensitises you to large-field motion. Stay relaxed and let it move past.',
+    category: 'habituation',
+    cue: 'Stay relaxed and let the field drift past.',
+    displayName: 'Optokinetic Stimulation',
+    duration: 30,
+    weight: 1.25,
+  },
+  smooth_pursuit: {
     blurb:
       'Follow a target as it glides along a winding path, using your eyes only. Keep your head completely still.',
-    displayName: 'Path tracing',
+    category: 'ocular_motor',
+    cue: 'Head still, follow with your eyes only.',
+    displayName: 'Smooth Pursuit',
+    weight: 0.8,
   },
-  random_saccades: {
-    blurb:
-      'Targets appear at unpredictable points. Snap your gaze to each one the moment it shows up.',
-    displayName: 'Random Saccades',
-    duration: 45,
-  },
-  vor_horizontal: {
+  vor_x1_horizontal: {
     blurb:
       'Hold your gaze on a fixed target while turning your head side to side at a steady tempo.',
-    displayName: 'VOR Horizontal',
+    category: 'gaze_stability',
+    cue: 'Turn your head left and right, keep your eyes on the target.',
+    displayName: 'VOR x1 Horizontal',
+    weight: 0.95,
   },
-  vor_horizontal_combo: {
-    blurb:
-      'The target drifts opposite your head turn, so your eyes work twice as hard. The harder horizontal progression.',
-    displayName: 'VOR Horizontal Combo',
-    duration: 45,
-  },
-  vor_vertical: {
+  vor_x1_vertical: {
     blurb:
       'Hold your gaze on a fixed target while nodding your head up and down at a steady tempo.',
-    displayName: 'VOR Vertical',
+    category: 'gaze_stability',
+    cue: 'Nod up and down, keep your eyes on the target.',
+    displayName: 'VOR x1 Vertical',
+    weight: 1,
   },
-  vor_vertical_combo: {
+  vor_x2_horizontal: {
+    blurb:
+      'The target drifts opposite your head turn, so your eyes work twice as hard. The harder horizontal progression.',
+    category: 'gaze_stability',
+    cue: 'Move your head opposite to the target.',
+    displayName: 'VOR x2 Horizontal',
+    duration: 45,
+    weight: 1.2,
+  },
+  vor_x2_vertical: {
     blurb:
       'The target drifts opposite your nod, so your eyes work twice as hard. The harder vertical progression.',
-    displayName: 'VOR Vertical Combo',
+    category: 'gaze_stability',
+    cue: 'Nod opposite to the drift of the target.',
+    displayName: 'VOR x2 Vertical',
     duration: 45,
+    weight: 1.25,
   },
 } satisfies Record<ExerciseType, ExerciseCopy & Partial<ExerciseTuning>>;
 
