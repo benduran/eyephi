@@ -2,9 +2,9 @@
 
 import { Card } from '@primereact/ui/card';
 import { Tag } from '@primereact/ui/tag';
+import type { ProgramItemView } from '../schema/types';
 import { ProgramPanelItem } from './programPanelItem';
 import { ProgramSummary } from './programSummary';
-import type { ProgramItemView } from './types';
 
 export type ProgramPanelProps = {
   countLabel: string;

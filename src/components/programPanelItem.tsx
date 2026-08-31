@@ -1,8 +1,8 @@
 'use client';
 
 import { Button } from '@primereact/ui/button';
+import type { ProgramItemView } from '../schema/types';
 import { ProgressMeter } from './progressMeter';
-import type { ProgramItemView } from './types';
 
 export type ProgramPanelItemProps = {
   item: ProgramItemView;

@@ -12,7 +12,7 @@ function getCurrentOsTheme(): Theme {
     const m = window.matchMedia('(prefers-color-scheme: dark)');
     return m.matches ? 'dark' : 'light';
   }
-  return 'dark';
+  return 'light';
 }
 
 /**

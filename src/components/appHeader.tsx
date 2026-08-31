@@ -1,11 +1,11 @@
 'use client';
 
 import { Button } from '@primereact/ui/button';
-import type { Theme } from '../../hooks/useTheme';
+import type { Theme } from '../hooks/useTheme';
+import type { ProgramProgressView } from '../schema/types';
 import { EyePhiLogo } from './eyePhiLogo';
 import { ProgressMeter } from './progressMeter';
 import { ThemeToggle } from './themeToggle';
-import type { ProgramProgressView } from './types';
 
 export type AppHeaderProps = {
   onNewProgram: () => void;
@@ -42,7 +42,7 @@ export function AppHeader({
         </div>
 
         <div className="flex min-w-0 flex-1 items-center justify-center">
-          {progress ? (
+          {progress && (
             <div className="hidden w-full max-w-[520px] items-center gap-3 wide:flex">
               <span className="font-mono text-xs tracking-wide text-surface-600 dark:text-surface-400">
                 {progress.elapsedLabel}
@@ -56,7 +56,7 @@ export function AppHeader({
                 {progress.totalTimeLabel}
               </span>
             </div>
-          ) : null}
+          )}
         </div>
 
         <div className="flex flex-none items-center gap-2">
@@ -82,7 +82,7 @@ export function AppHeader({
         </div>
       </div>
 
-      {progress ? (
+      {progress && (
         <div className="flex items-center gap-2.5 px-4 pb-2.5 wide:hidden">
           <span className="font-mono text-[11px] text-surface-600 dark:text-surface-400">
             {progress.elapsedLabel}
@@ -96,7 +96,7 @@ export function AppHeader({
             {progress.totalTimeLabel}
           </span>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }

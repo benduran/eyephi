@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@primereact/ui/card';
-import type { ExerciseView } from './types';
+import type { ExerciseView } from '../schema/types';
 
 export type ExerciseCardProps = {
   exercise: ExerciseView;

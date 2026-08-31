@@ -3,7 +3,7 @@
 import { ToggleButton } from '@primereact/ui/togglebutton';
 import type { ToggleButtonGroupValueChangeEvent } from '@primereact/ui/togglebuttongroup';
 import { ToggleButtonGroup } from '@primereact/ui/togglebuttongroup';
-import type { CategoryView } from './types';
+import type { CategoryView } from '../schema/types';
 
 export type CategoryFilterProps = {
   categories: CategoryView[];

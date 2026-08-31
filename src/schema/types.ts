@@ -1,8 +1,3 @@
-/**
- * View models for the EyePhi components. Every field is already display-ready --
- * formatting, scoring and totals stay in the caller.
- */
-
 export type ProgramProgressView = {
   elapsedLabel: string;
   progressPct: number;

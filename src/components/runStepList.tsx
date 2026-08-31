@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@primereact/ui/card';
-import type { RunStepView } from './types';
+import type { RunStepView } from '../schema/types';
 
 export type RunStepListProps = {
   difficultyValue: string;

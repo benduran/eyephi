@@ -3,7 +3,7 @@
 import { ToggleButton } from '@primereact/ui/togglebutton';
 import type { ToggleButtonGroupValueChangeEvent } from '@primereact/ui/togglebuttongroup';
 import { ToggleButtonGroup } from '@primereact/ui/togglebuttongroup';
-import type { PaletteView } from './types';
+import type { PaletteView } from '../schema/types';
 
 export type PaletteChooserProps = {
   onPaletteChange: (id: string) => void;

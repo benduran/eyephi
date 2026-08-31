@@ -6,11 +6,11 @@ import { Checkbox } from '@primereact/ui/checkbox';
 import type { DialogRootChangeEvent } from '@primereact/ui/dialog';
 import { Dialog } from '@primereact/ui/dialog';
 import type { Ref } from 'react';
+import type { PaletteView } from '../schema/types';
 import { DifficultyMeter } from './difficultyMeter';
 import { ExerciseCanvas } from './exerciseCanvas';
 import { PaletteChooser } from './paletteChooser';
 import { SliderField } from './sliderField';
-import type { PaletteView } from './types';
 
 export type ConfigDialogProps = {
   addButtonLabel: string;

@@ -1,11 +1,11 @@
 'use client';
 
 import type { Ref } from 'react';
+import type { RunStepView } from '../schema/types';
 import { ExerciseCanvas } from './exerciseCanvas';
 import type { RunControlsProps } from './runControls';
 import { RunControls } from './runControls';
 import { RunStepList } from './runStepList';
-import type { RunStepView } from './types';
 
 export type RunViewProps = RunControlsProps & {
   currentName: string;

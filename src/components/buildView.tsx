@@ -1,10 +1,10 @@
 'use client';
 
+import type { CategoryView, ExerciseView } from '../schema/types';
 import { CategoryFilter } from './categoryFilter';
 import { ExerciseCatalog } from './exerciseCatalog';
 import type { ProgramPanelProps } from './programPanel';
 import { ProgramPanel } from './programPanel';
-import type { CategoryView, ExerciseView } from './types';
 
 export type BuildViewProps = {
   categories: CategoryView[];

@@ -1,22 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { AppHeader } from '../components/eyephi/appHeader';
-import { BuildView } from '../components/eyephi/buildView';
-import { ConfigDialog } from '../components/eyephi/configDialog';
-import { DoneView } from '../components/eyephi/doneView';
-import { ImmersiveOverlay } from '../components/eyephi/immersiveOverlay';
-import { MobileSubmitBar } from '../components/eyephi/mobileSubmitBar';
-import { ReadyDialog } from '../components/eyephi/readyDialog';
-import { RunView } from '../components/eyephi/runView';
+import { AppHeader } from '../components/appHeader';
+import { BuildView } from '../components/buildView';
+import { ConfigDialog } from '../components/configDialog';
+import { DoneView } from '../components/doneView';
+import { ImmersiveOverlay } from '../components/immersiveOverlay';
+import { MobileSubmitBar } from '../components/mobileSubmitBar';
+import { ReadyDialog } from '../components/readyDialog';
+import { RunView } from '../components/runView';
+import { useTheme } from '../hooks/useTheme';
 import type {
   CategoryView,
   ExerciseView,
   PaletteView,
   ProgramItemView,
   RunStepView,
-} from '../components/eyephi/types';
-import { useTheme } from '../hooks/useTheme';
+} from '../schema/types';
 import { Providers } from './providers';
 
 /*

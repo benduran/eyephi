@@ -1,7 +1,7 @@
 'use client';
 
+import type { ExerciseView } from '../schema/types';
 import { ExerciseCard } from './exerciseCard';
-import type { ExerciseView } from './types';
 
 export type ExerciseCatalogProps = {
   exercises: ExerciseView[];

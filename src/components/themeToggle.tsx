@@ -2,7 +2,7 @@
 
 import { MoonIcon, SunIcon } from '@phosphor-icons/react';
 import { Button } from '@primereact/ui/button';
-import type { Theme } from '../../hooks/useTheme';
+import type { Theme } from '../hooks/useTheme';
 
 export type ThemeToggleProps = {
   onThemeChange: (theme: Theme) => void;
