@@ -31,8 +31,7 @@ function applyThemeToDocument(theme: Theme) {
 /** Reads the theme the inline layout script already applied, and persists changes to it. */
 export function useTheme() {
   /** hooks */
-  const [theme, setTheme] = useLocalStorage<Theme>(
-    STORAGE_KEY,
+  const [theme, setTheme] = useLocalStorage<Theme>(STORAGE_KEY, () =>
     getCurrentOsTheme(),
   );
 
