@@ -26,6 +26,15 @@ export const ColorSchemeSchema = z.enum([
 ]);
 export type ColorScheme = z.infer<typeof ColorSchemeSchema>;
 
+/** Plain-language band a difficulty score falls into. */
+export const DifficultyBandSchema = z.enum([
+  'gentle',
+  'moderate',
+  'challenging',
+  'intense',
+]);
+export type DifficultyBand = z.infer<typeof DifficultyBandSchema>;
+
 /** Shared by the model and the wire format so the bounds cannot drift apart. */
 // value is in seconds
 export const ExerciseDurationSchema = z
