@@ -1,0 +1,16 @@
+{
+  "exclude": [
+    "node_modules"
+  ],
+  "extends": [
+    "@cprussin/tsconfig/next.json"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ]
+}
