@@ -2,14 +2,13 @@
 
 import { MoonIcon, SunIcon } from '@phosphor-icons/react';
 import { Button } from '@primereact/ui/button';
-import type { Theme } from '../hooks/useTheme';
+import { useTheme } from '../context/ThemeProvider';
+import type { Theme } from '../schema/types';
 
-export type ThemeToggleProps = {
-  onThemeChange: (theme: Theme) => void;
-  theme: Theme;
-};
+export function ThemeToggle() {
+  /** context */
+  const { theme, setTheme } = useTheme();
 
-export function ThemeToggle({ onThemeChange, theme }: ThemeToggleProps) {
   const next: Theme = theme === 'dark' ? 'light' : 'dark';
   const label = `Switch to ${next} theme`;
 
@@ -17,7 +16,7 @@ export function ThemeToggle({ onThemeChange, theme }: ThemeToggleProps) {
     <Button
       aria-label={label}
       iconOnly
-      onClick={() => onThemeChange(next)}
+      onClick={() => setTheme(next)}
       severity="secondary"
       title={label}
       variant="outlined"

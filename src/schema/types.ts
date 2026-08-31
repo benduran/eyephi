@@ -1,3 +1,10 @@
+import { z } from 'zod';
+
+export type Nullish<T> = T | null | undefined;
+
+export const ThemeSchema = z.enum(['dark', 'light']).default('light');
+export type Theme = 'dark' | 'light';
+
 export type ProgramProgressView = {
   elapsedLabel: string;
   progressPct: number;

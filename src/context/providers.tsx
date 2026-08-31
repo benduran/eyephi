@@ -4,9 +4,13 @@ import { PrimeReactProvider } from '@primereact/core';
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import type { PropsWithChildren } from 'react';
+import { ThemeProvider } from './ThemeProvider';
 
-// EyePhi's design is strictly monochrome, and every grey in the canvas is an
-// exact step of Aura's neutral ramp -- so both palettes are pinned to it.
+/**
+ * we have to stick to monochromatic themes here because the whole point
+ * of the application is to *not* overwhelm people that are actively undergoing
+ * rehab and are currently hyper-sensitive to visual noise
+ */
 const neutralRamp = {
   50: '{neutral.50}',
   100: '{neutral.100}',
@@ -57,6 +61,8 @@ const primereactConfig = {
 
 export function Providers({ children }: PropsWithChildren) {
   return (
-    <PrimeReactProvider {...primereactConfig}>{children}</PrimeReactProvider>
+    <PrimeReactProvider {...primereactConfig}>
+      <ThemeProvider>{children}</ThemeProvider>
+    </PrimeReactProvider>
   );
 }

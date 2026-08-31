@@ -1,38 +1,56 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 
-/* Make Tailwind's dark: utilities follow the .dark class (toggled by useTheme) */
-@custom-variant dark (&:where(.dark, .dark *));
+/*
+ * Primereact's Aura v3 theme declares every
+ * token once through CSS light-dark(), and PrimeReact's whole dark block is
+ * literally `.dark { color-scheme: dark }`, so the media query below is
+ * sufficient by itself.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(.light), :root:not(.light) *) {
+      @slot;
+    }
+  }
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+}
 
 @theme {
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
-  /* EyePhi layout breakpoints, carried over from the design canvas */
-  --breakpoint-cards: 620px;
-  --breakpoint-wide: 760px;
-  --breakpoint-dlg: 860px;
-  --breakpoint-aside: 1080px;
+  --breakpoint-maxcontent: 1200px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    color-scheme: dark;
+  }
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+:root.light {
+  color-scheme: light;
 }
 
 /*
- * Aura v3 resolves every semantic token through CSS light-dark(), which reads
- * the computed color-scheme rather than the .dark class -- so color-scheme has
- * to be set here, not left to the theme CSS.
- *
- * The literal fallbacks matter too: PrimeReactProvider injects its --p-* vars
- * on the client, so these vars are undefined on first paint without them.
+ * The literal fallbacks cover first paint: PrimeReactProvider injects its --p-*
+ * vars on the client, so these are undefined until it mounts. light-dark()
+ * picks the right one off the color-scheme resolved above.
  */
 :root {
-  color-scheme: light;
-  --background: var(--p-surface-50, #fafafa);
-  --foreground: var(--p-text-color, #171717);
-}
-
-.dark {
-  color-scheme: dark;
-  --background: var(--p-surface-950, #0a0a0a);
-  --foreground: var(--p-text-color, #fafafa);
+  --background: light-dark(var(--p-surface-50, #fafafa), var(--p-surface-950, #0a0a0a));
+  --foreground: var(--p-text-color, light-dark(#171717, #fafafa));
 }
 
 body {

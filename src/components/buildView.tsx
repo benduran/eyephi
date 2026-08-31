@@ -37,7 +37,7 @@ export function BuildView({
           </p>
         </div>
 
-        <div className="mb-3.5">
+        {/* <div className="mb-3.5">
           <CategoryFilter
             categories={categories}
             onCategoryChange={onCategoryChange}
@@ -45,12 +45,10 @@ export function BuildView({
           />
         </div>
 
-        <ExerciseCatalog exercises={exercises} onConfigure={onConfigure} />
+        <ExerciseCatalog exercises={exercises} onConfigure={onConfigure} /> */}
       </section>
 
-      <aside>
-        <ProgramPanel {...program} />
-      </aside>
+      <aside>{/* <ProgramPanel {...program} /> */}</aside>
     </main>
   );
 }
