@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@primereact/ui/card';
 import Link from 'next/link';
+import { useBasketBuilder } from '../context/BasketBuilder';
 import { formatDuration } from '../lib/format';
 import { toCategoryLabel } from '../lib/labels';
 import { uiRoutes } from '../routing/uiRoutes';
@@ -20,11 +21,14 @@ type ExerciseCardProps = {
 };
 
 export function ExerciseCard({ exercise }: ExerciseCardProps) {
+  /** context */
+  const { exercises } = useBasketBuilder();
+
   const { blurb, category, displayName, duration, type } = exercise;
   return (
     <Link
       className="group flex flex-col"
-      href={uiRoutes.basketBuilderAdd(type)}
+      href={uiRoutes.basketBuilderAdd(type, exercises)}
     >
       <CardRoot className="border-2 border-transparent grow transition-colors group-hover:border-primary">
         <CardBody className="flex flex-col grow justify-between">

@@ -1,11 +1,15 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { parseAsBoolean, useQueryState } from 'nuqs';
+import { useCallback } from 'react';
 import { useBasketBuilder } from '../context/BasketBuilder';
 import {
   scoreProgram,
   toDifficultyBand,
   totalDuration,
 } from '../lib/difficulty';
+import { QUERY_KEYS, uiRoutes } from '../routing/uiRoutes';
 import type { Exercise } from '../schema/types';
 import { isNumber } from '../util/isNumber';
 import { ConfigDialog } from './ConfigDialog';
@@ -13,6 +17,7 @@ import { Centering } from './centering';
 import { ExerciseCatalog } from './ExerciseCatalog';
 import { MobileSubmitBar } from './MobileSubmitBar';
 import { ProgramPanel } from './ProgramPanel';
+import { ReadyDialog } from './ReadyDialog';
 
 export function ExerciseBasket() {
   /** context */
@@ -26,11 +31,18 @@ export function ExerciseBasket() {
     updateExercise,
   } = useBasketBuilder();
 
-  // TODO(slice 7): opens the ready dialog once it exists.
-  const onSubmit = () => undefined;
-
   const difficulty = scoreProgram(exercises);
   const draft = adding ?? editing;
+
+  /** routing */
+  const router = useRouter();
+  const [ready, setReady] = useQueryState(
+    QUERY_KEYS.ready,
+    parseAsBoolean.withDefault(false).withOptions({ shallow: true }),
+  );
+
+  /** callbacks */
+  const onSubmit = useCallback(() => setReady(true), [setReady]);
 
   return (
     <section id="home">
@@ -55,6 +67,17 @@ export function ExerciseBasket() {
           <ProgramPanel onSubmit={onSubmit} />
         </div>
       </Centering>
+
+      {ready && (
+        <ReadyDialog
+          exercises={exercises}
+          onClose={() => setReady(false)}
+          onStartNow={() => {
+            setReady(false);
+            router.push(uiRoutes.runProgram(exercises));
+          }}
+        />
+      )}
 
       {draft && (
         <ConfigDialog

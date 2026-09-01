@@ -16,15 +16,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <html className="h-full" lang="en" suppressHydrationWarning>
       <body className="min-h-full">
         <Providers>
-          <AppHeader
-            onNewProgram={null}
-            onPrimaryAction={null}
-            onShare={null}
-            primaryDisabled={false}
-            primaryLabel="Start program"
-            progress={null}
-            shareDisabled={false}
-          />
+          <AppHeader />
           <div className="pt-3">{children}</div>
         </Providers>
       </body>
