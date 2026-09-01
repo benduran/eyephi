@@ -1,31 +1,58 @@
+'use client';
+
+import { useBasketBuilder } from '../context/BasketBuilder';
+import {
+  scoreProgram,
+  toDifficultyBand,
+  totalDuration,
+} from '../lib/difficulty';
 import { Centering } from './centering';
-import { ExercisesList } from './ExercisesList';
+import { ExerciseCatalog } from './ExerciseCatalog';
+import { MobileSubmitBar } from './MobileSubmitBar';
+import { ProgramPanel } from './ProgramPanel';
 
 export function ExerciseBasket() {
+  /** context */
+  const { exercises } = useBasketBuilder();
+
+  // TODO(slice 7): opens the ready dialog once it exists.
+  const onSubmit = () => undefined;
+
+  const difficulty = scoreProgram(exercises);
+
   return (
     <section id="home">
       <Centering>
-        <div className="grid grid-cols-[2.5fr_1fr] gap-4">
+        <div className="grid grid-cols-1 items-start gap-8 pb-28 sidebyside:grid-cols-[minmax(0,1fr)_372px] sidebyside:pb-18">
           <div className="flex flex-col gap-4">
-            <div className="w-100">
-              <h1 className="font-semibold text-xl">Build your program</h1>
+            <div className="max-w-[56ch]">
+              <h1 className="font-semibold text-xl tracking-tight">
+                Build your program
+              </h1>
               <p className="text-sm text-muted-color">
-                Choose exericses, tune each one to your current tolerance, then
+                Choose exercises, tune each one to your current tolerance, then
                 add it to your program.
               </p>
               <p className="text-sm text-muted-color">
-                Each exercise will have a difficulty rating applied to it, which
-                is based on the exercise's speed, duration, visual noise and
-                intensity.
+                Difficulty is scored from speed, intensity, duration and visual
+                contrast.
               </p>
             </div>
-            <div>
-              <ExercisesList />
-            </div>
+            <ExerciseCatalog />
           </div>
-          <div>other stuff</div>
+          <ProgramPanel onSubmit={onSubmit} />
         </div>
       </Centering>
+
+      {exercises.length > 0 && (
+        <MobileSubmitBar
+          band={toDifficultyBand(difficulty)}
+          difficulty={difficulty}
+          exerciseCount={exercises.length}
+          onSubmit={onSubmit}
+          totalSeconds={totalDuration(exercises)}
+        />
+      )}
     </section>
   );
 }

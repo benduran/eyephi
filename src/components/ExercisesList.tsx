@@ -1,15 +1,14 @@
-'use client';
-
-import { useBasketBuilder } from '../context/BasketBuilder';
+import type { Exercise } from '../schema/types';
 import { ExerciseCard } from './ExerciseCard';
 
-export function ExercisesList() {
-  /** context */
-  const { defaultExercises } = useBasketBuilder();
+export type ExercisesListProps = {
+  exercises: Exercise[];
+};
 
+export function ExercisesList({ exercises }: ExercisesListProps) {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {defaultExercises.map((ex) => (
+    <div className="grid grid-cols-1 gap-4 catalog:grid-cols-2">
+      {exercises.map((ex) => (
         <ExerciseCard exercise={ex} key={ex.type} />
       ))}
     </div>

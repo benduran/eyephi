@@ -128,3 +128,7 @@ export function toDifficultyBand(score: number): DifficultyBand {
     BAND_CEILINGS.find(({ ceiling }) => score < ceiling)?.band ?? 'intense'
   );
 }
+
+export function formatDifficultyScore(score: number) {
+  return score.toFixed(1);
+}

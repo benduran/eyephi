@@ -22,6 +22,10 @@
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
+  /* Named for what changes at each width, taken from the design's metrics(). */
+  --breakpoint-catalog: 620px;
+  --breakpoint-wide: 760px;
+  --breakpoint-sidebyside: 1080px;
   --breakpoint-maxcontent: 1200px;
 }
 
