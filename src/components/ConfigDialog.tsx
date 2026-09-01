@@ -7,11 +7,11 @@ import { Checkbox } from '@primereact/ui/checkbox';
 import type { DialogRootChangeEvent } from '@primereact/ui/dialog';
 import { Dialog } from '@primereact/ui/dialog';
 import { useCallback, useMemo, useState } from 'react';
-import { formatDifficultyScore, scoreExercise } from '../lib/difficulty';
-import { formatDuration } from '../lib/format';
+import { scoreExercise } from '../lib/difficulty';
+import { formatDifficultyScore, formatDuration } from '../lib/format';
 import { toCategoryLabel } from '../lib/labels';
 import { numericBounds } from '../lib/schemaBounds';
-import type { Exercise } from '../schema/types';
+import type { ColorScheme, Exercise, TargetPath } from '../schema/types';
 import {
   ExerciseDurationSchema,
   ExerciseIntensitySchema,
@@ -21,7 +21,7 @@ import {
 import { ExerciseCanvas } from './ExerciseCanvas';
 import { ExerciseConfigBreakdown } from './ExerciseConfigBreakdown';
 import { PaletteChooser } from './PaletteChooser';
-import { ProgressMeter } from './progressMeter';
+import { ProgressMeter } from './ProgressMeter';
 import { SliderField } from './SliderField';
 import { TargetPathChooser } from './TargetPathChooser';
 
@@ -46,31 +46,57 @@ export function ConfigDialog({
   onClose,
   submitLabel,
 }: ConfigDialogProps) {
-  /** state */
   const [draft, setDraft] = useState(exercise);
 
-  /** memos */
   const difficulty = useMemo(() => scoreExercise(draft), [draft]);
 
-  /** callbacks */
   const updateDraft = useCallback(
     (update: Partial<Exercise>) =>
       setDraft((prev) => {
         const validated = ExerciseSchema.safeParse({ ...prev, ...update });
-        if (validated.success) return validated.data;
-        return prev;
+        return validated.success ? validated.data : prev;
       }),
     [],
   );
 
+  const onOpenChange = useCallback(
+    (event: DialogRootChangeEvent) => {
+      if (!event.value) onClose();
+    },
+    [onClose],
+  );
+  const onDurationChange = useCallback(
+    (duration: number) => updateDraft({ duration }),
+    [updateDraft],
+  );
+  const onSpeedChange = useCallback(
+    (speed: number) => updateDraft({ speed }),
+    [updateDraft],
+  );
+  const onIntensityChange = useCallback(
+    (intensity: number) => updateDraft({ intensity }),
+    [updateDraft],
+  );
+  const onPathSelect = useCallback(
+    (path: TargetPath) => updateDraft({ path }),
+    [updateDraft],
+  );
+  const onSchemeSelect = useCallback(
+    (scheme: ColorScheme) => updateDraft({ scheme }),
+    [updateDraft],
+  );
+  const onBackgroundNoiseChange = useCallback(
+    (event: CheckboxRootChangeEvent) =>
+      updateDraft({ backgroundNoise: event.checked }),
+    [updateDraft],
+  );
+  const onSubmit = useCallback(
+    () => onAddExerciseToProgram(draft),
+    [draft, onAddExerciseToProgram],
+  );
+
   return (
-    <Dialog.Root
-      modal
-      onOpenChange={(event: DialogRootChangeEvent) => {
-        if (!event.value) onClose();
-      }}
-      open
-    >
+    <Dialog.Root modal onOpenChange={onOpenChange} open>
       <Dialog.Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -95,7 +121,7 @@ export function ConfigDialog({
                   rounded
                   variant="text"
                 >
-                  <XIcon />
+                  <XIcon aria-hidden />
                 </Dialog.Close>
               </Dialog.HeaderActions>
             </Dialog.Header>
@@ -106,7 +132,7 @@ export function ConfigDialog({
                   label="Duration"
                   max={DURATION.max}
                   min={DURATION.min}
-                  onChange={(duration) => updateDraft({ duration })}
+                  onChange={onDurationChange}
                   step={DURATION_STEP}
                   value={draft.duration}
                   valueLabel={formatDuration(draft.duration)}
@@ -115,7 +141,7 @@ export function ConfigDialog({
                   label="Speed"
                   max={SPEED.max}
                   min={SPEED.min}
-                  onChange={(speed) => updateDraft({ speed })}
+                  onChange={onSpeedChange}
                   value={draft.speed}
                   valueLabel={`${draft.speed} / ${SPEED.max}`}
                 />
@@ -124,7 +150,7 @@ export function ConfigDialog({
                   label="Intensity"
                   max={INTENSITY.max}
                   min={INTENSITY.min}
-                  onChange={(intensity) => updateDraft({ intensity })}
+                  onChange={onIntensityChange}
                   value={draft.intensity}
                   valueLabel={`${draft.intensity} / ${INTENSITY.max}`}
                 />
@@ -139,7 +165,7 @@ export function ConfigDialog({
                       </span>
                     </span>
                     <TargetPathChooser
-                      onSelect={(path) => updateDraft({ path })}
+                      onSelect={onPathSelect}
                       selected={draft.path}
                     />
                   </div>
@@ -148,7 +174,7 @@ export function ConfigDialog({
                 <div className="flex flex-col gap-2.5">
                   <span className="text-sm font-medium">Color scheme</span>
                   <PaletteChooser
-                    onSelect={(scheme) => updateDraft({ scheme })}
+                    onSelect={onSchemeSelect}
                     selected={draft.scheme}
                   />
                 </div>
@@ -157,13 +183,11 @@ export function ConfigDialog({
                   <Checkbox.Root
                     checked={draft.backgroundNoise}
                     inputId="background-noise"
-                    onCheckedChange={(event: CheckboxRootChangeEvent) =>
-                      updateDraft({ backgroundNoise: event.checked })
-                    }
+                    onCheckedChange={onBackgroundNoiseChange}
                   >
                     <Checkbox.Box>
                       <Checkbox.Indicator match="checked">
-                        <CheckIcon />
+                        <CheckIcon aria-hidden />
                       </Checkbox.Indicator>
                     </Checkbox.Box>
                   </Checkbox.Root>
@@ -209,9 +233,7 @@ export function ConfigDialog({
                   </p>
                 </div>
 
-                <Button onClick={() => onAddExerciseToProgram(draft)}>
-                  {submitLabel}
-                </Button>
+                <Button onClick={onSubmit}>{submitLabel}</Button>
               </div>
             </Dialog.Content>
           </Dialog.Popup>

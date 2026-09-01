@@ -1,8 +1,9 @@
-'use client';
-
 import { Button } from '@primereact/ui/button';
-import { formatDifficultyScore } from '../lib/difficulty';
-import { formatDuration } from '../lib/format';
+import {
+  formatDifficultyScore,
+  formatDuration,
+  formatExerciseCount,
+} from '../lib/format';
 import { toDifficultyBandLabel } from '../lib/labels';
 import type { DifficultyBand } from '../schema/types';
 
@@ -14,8 +15,7 @@ export type MobileSubmitBarProps = {
   totalSeconds: number;
 };
 
-// PrimeReact has no fixed action bar, so this one is hand-built. The bottom
-// padding clears the home indicator on phones.
+// PrimeReact has no fixed action bar; the bottom padding clears the phone home indicator.
 export function MobileSubmitBar({
   band,
   difficulty,
@@ -29,8 +29,8 @@ export function MobileSubmitBar({
         <div className="font-mono text-sm font-medium">
           {`${formatDuration(totalSeconds)} · D ${formatDifficultyScore(difficulty)}`}
         </div>
-        <div className="text-[11px] uppercase tracking-wide text-muted-color">
-          {`${exerciseCount} ${exerciseCount === 1 ? 'exercise' : 'exercises'} · ${toDifficultyBandLabel(band)}`}
+        <div className="text-meta uppercase tracking-wide text-muted-color">
+          {`${formatExerciseCount(exerciseCount)} · ${toDifficultyBandLabel(band)}`}
         </div>
       </div>
       <Button onClick={onSubmit}>Submit</Button>

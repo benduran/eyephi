@@ -1,5 +1,6 @@
 import { encodeExerciseProgram } from '../lib/programCodec';
-import type { Exercise, Nullish, Program } from '../schema/types';
+import type { Exercise, Program } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 /**
  * Every query key the app reads, in one place so a route builder and the hook

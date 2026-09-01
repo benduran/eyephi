@@ -3,6 +3,7 @@
 import { ToggleButton } from '@primereact/ui/togglebutton';
 import type { ToggleButtonGroupValueChangeEvent } from '@primereact/ui/togglebuttongroup';
 import { ToggleButtonGroup } from '@primereact/ui/togglebuttongroup';
+import { useCallback } from 'react';
 import { PALETTES } from '../lib/palettes';
 import type { ColorScheme } from '../schema/types';
 import { ColorSchemeSchema } from '../schema/types';
@@ -13,13 +14,18 @@ export type PaletteChooserProps = {
 };
 
 export function PaletteChooser({ onSelect, selected }: PaletteChooserProps) {
+  const onValueChange = useCallback(
+    (event: ToggleButtonGroupValueChangeEvent) => {
+      const next = ColorSchemeSchema.safeParse(event.value);
+      if (next.success) onSelect(next.data);
+    },
+    [onSelect],
+  );
+
   return (
     <ToggleButtonGroup
       className="grid! grid-cols-2 gap-2.5 catalog:grid-cols-4"
-      onValueChange={(event: ToggleButtonGroupValueChangeEvent) => {
-        const next = ColorSchemeSchema.safeParse(event.value);
-        if (next.success) onSelect(next.data);
-      }}
+      onValueChange={onValueChange}
       value={selected}
     >
       {ColorSchemeSchema.options.map((scheme) => {

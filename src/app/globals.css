@@ -22,6 +22,11 @@
   --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
+  /* The design's sub-xs steps; Tailwind's scale stops at xs (12px). */
+  --text-tag: 0.625rem;
+  --text-meta: 0.6875rem;
+  --text-tight: 0.8125rem;
+
   /* Named for what changes at each width, taken from the design's metrics(). */
   --breakpoint-catalog: 620px;
   --breakpoint-wide: 760px;

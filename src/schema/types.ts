@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
-export type Nullish<T> = T | null | undefined;
-
-export const ThemeSchema = z.enum(['dark', 'light']).default('light');
-export type Theme = 'dark' | 'light';
+export const ThemeSchema = z.enum(['dark', 'light']);
+export type Theme = z.infer<typeof ThemeSchema>;
 
 export const ProgramProgressViewSchema = z.object({
   elapsed: z.int().min(0),
@@ -47,8 +45,7 @@ export const DifficultyBandSchema = z.enum([
 ]);
 export type DifficultyBand = z.infer<typeof DifficultyBandSchema>;
 
-/** Shared by the model and the wire format so the bounds cannot drift apart. */
-// value is in seconds
+/** Seconds. Shared by the model and the wire format so the bounds cannot drift apart. */
 export const ExerciseDurationSchema = z
   .int()
   .min(30)
@@ -56,11 +53,7 @@ export const ExerciseDurationSchema = z
 export const ExerciseIntensitySchema = z.int().min(1).max(10);
 export const ExerciseSpeedSchema = z.int().min(1).max(10);
 
-/**
- * in case you're wondering, since we're persisting the exercise configuration to the user's
- * query string, we *don't* need a unique ID because we don't care about deduplicating.
- * in fact, it's okay if a user adds multiple copies of the same type of exercise to their plan
- */
+/** No id: the same exercise may appear in a program more than once. */
 const BaseExericseSchema = z.object({
   backgroundNoise: z.boolean(),
   blurb: z.string().nonempty().nonoptional(),
@@ -76,8 +69,7 @@ const BaseExericseSchema = z.object({
   weight: z.number().min(0.5).max(2),
 });
 
-// NOTE: The discriminated union will allow us to further expand into other exericses
-// who might have non-uniform configuration options
+// Discriminated so a future exercise can carry configuration the others don't.
 export const ExerciseSchema = z.discriminatedUnion('type', [
   BaseExericseSchema.extend({
     type: z.literal('vor_x1_horizontal'),
@@ -117,9 +109,7 @@ export type Program = z.infer<typeof ProgramSchema>;
 /** Bump when the tuple layout changes so stale links fail cleanly instead of decoding wrong. */
 export const PROGRAM_WIRE_VERSION = 1;
 
-/**
- * Where each tuned field sits inside an encoded exercise tuple.
- */
+/** Where each tuned field sits inside an encoded exercise tuple. */
 export const ENCODED_EXERCISE_FIELDS = {
   backgroundNoise: 5,
   duration: 1,

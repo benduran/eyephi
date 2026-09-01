@@ -9,7 +9,9 @@ import {
 import type { PropsWithChildren } from 'react';
 import { createContext, useContext, useMemo } from 'react';
 import { decodeProgram, encodeExerciseProgram } from '../lib/programCodec';
-import type { Exercise, Nullish } from '../schema/types';
+import { QUERY_KEYS } from '../routing/uiRoutes';
+import type { Exercise } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 type BasketBuilderContextVal = {
   adding: Nullish<Exercise>;
@@ -43,7 +45,6 @@ export function BasketBuilderProvider({
   children,
   defaultExercises,
 }: BasketBuilderProviderProps) {
-  /** parsers */
   const programParser = useMemo(
     () =>
       createParser<Exercise[]>({
@@ -58,18 +59,19 @@ export function BasketBuilderProvider({
     [defaultExercises],
   );
 
-  /** hooks */
   const [adding, setAdding] = useQueryState(
-    'adding',
+    QUERY_KEYS.adding,
     parseAsString.withOptions({ shallow: true }),
   );
   const [editing, setEditing] = useQueryState(
-    'editing',
+    QUERY_KEYS.editing,
     parseAsInteger.withOptions({ shallow: true }),
   );
-  const [exercises, setExercises] = useQueryState('program', programParser);
+  const [exercises, setExercises] = useQueryState(
+    QUERY_KEYS.program,
+    programParser,
+  );
 
-  /** provider val */
   const providerVal = useMemo<BasketBuilderContextVal>(
     () => ({
       addExercise: (exerciseToAdd) =>

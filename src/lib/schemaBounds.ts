@@ -1,5 +1,5 @@
-import type { Nullish } from '../schema/types';
 import { isNumber } from '../util/isNumber';
+import type { Nullish } from '../util/nullish';
 
 type BoundedSchema = {
   maxValue: Nullish<number>;
@@ -11,11 +11,7 @@ export type Bounds = {
   min: number;
 };
 
-/**
- * Reads a numeric schema's range so callers never restate it. Throws rather
- * than guessing, because a bound that silently defaults skews every score and
- * every slider built from it.
- */
+/** Throws rather than defaulting: a silently-guessed bound skews every score and slider built from it. */
 export function numericBounds(schema: BoundedSchema): Bounds {
   const { maxValue, minValue } = schema;
   if (!isNumber(minValue) || !isNumber(maxValue) || minValue === maxValue) {

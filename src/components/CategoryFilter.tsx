@@ -3,9 +3,11 @@
 import { ToggleButton } from '@primereact/ui/togglebutton';
 import type { ToggleButtonGroupValueChangeEvent } from '@primereact/ui/togglebuttongroup';
 import { ToggleButtonGroup } from '@primereact/ui/togglebuttongroup';
+import { useCallback } from 'react';
 import { toCategoryLabel } from '../lib/labels';
-import type { ExerciseCategory, Nullish } from '../schema/types';
+import type { ExerciseCategory } from '../schema/types';
 import { ExerciseCategorySchema } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 export type CategoryFilterProps = {
   onSelect: (category: Nullish<ExerciseCategory>) => void;
@@ -16,12 +18,16 @@ export type CategoryFilterProps = {
 const ALL = 'all' as const;
 
 export function CategoryFilter({ onSelect, selected }: CategoryFilterProps) {
+  const onValueChange = useCallback(
+    (event: ToggleButtonGroupValueChangeEvent) =>
+      onSelect(ExerciseCategorySchema.safeParse(event.value).data),
+    [onSelect],
+  );
+
   return (
     <div className="overflow-x-auto whitespace-nowrap touch-auto">
       <ToggleButtonGroup
-        onValueChange={(event: ToggleButtonGroupValueChangeEvent) =>
-          onSelect(ExerciseCategorySchema.safeParse(event.value).data)
-        }
+        onValueChange={onValueChange}
         size="small"
         value={selected ?? ALL}
       >

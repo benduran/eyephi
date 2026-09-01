@@ -2,18 +2,16 @@
 
 import { useMemo, useState } from 'react';
 import { useBasketBuilder } from '../context/BasketBuilder';
-import type { ExerciseCategory, Nullish } from '../schema/types';
+import type { ExerciseCategory } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 import { CategoryFilter } from './CategoryFilter';
 import { ExercisesList } from './ExercisesList';
 
 export function ExerciseCatalog() {
-  /** context */
   const { defaultExercises } = useBasketBuilder();
 
-  /** state */
   const [category, setCategory] = useState<Nullish<ExerciseCategory>>(null);
 
-  /** memos */
   const visible = useMemo(
     () =>
       category

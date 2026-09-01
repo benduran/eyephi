@@ -88,7 +88,7 @@ Biome is configured with `preset: "none"` and an explicit rule list. Notable one
 - `useImportType` with `separatedType` → `import type { X } from '…'` on its own line.
 - `useAsConstAssertion`, `useConst`, `noInferrableTypes`, `useExplicitLengthCheck` (`arr.length > 0`, not `arr.length`).
 - Full **a11y** rule set is on at `error`. Interactive elements need roles, labels, and key handlers.
-- `useExhaustiveDependencies` is a warning — React Compiler is on, so don't hand-roll `useMemo`/`useCallback` unless you've measured a reason to.
+- `useExhaustiveDependencies` is a warning. React Compiler is on, but that does **not** mean memoization is optional here: memoize deliberately. Derived values in client components go behind `useMemo`, and any callback passed across a component boundary goes behind `useCallback` with correct deps. Do not strip existing `useMemo`/`useCallback`.
 
 Before saying you're done: `mise x -- pnpm lint` must be clean and `mise x -- pnpm build` must succeed.
 

@@ -2,25 +2,21 @@
 
 import { useRouter } from 'next/navigation';
 import { parseAsBoolean, useQueryState } from 'nuqs';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useBasketBuilder } from '../context/BasketBuilder';
-import {
-  scoreProgram,
-  toDifficultyBand,
-  totalDuration,
-} from '../lib/difficulty';
+import { scoreProgram, toDifficultyBand } from '../lib/difficulty';
+import { totalDuration } from '../lib/program';
 import { QUERY_KEYS, uiRoutes } from '../routing/uiRoutes';
 import type { Exercise } from '../schema/types';
 import { isNumber } from '../util/isNumber';
+import { Centering } from './Centering';
 import { ConfigDialog } from './ConfigDialog';
-import { Centering } from './centering';
 import { ExerciseCatalog } from './ExerciseCatalog';
 import { MobileSubmitBar } from './MobileSubmitBar';
 import { ProgramPanel } from './ProgramPanel';
 import { ReadyDialog } from './ReadyDialog';
 
 export function ExerciseBasket() {
-  /** context */
   const {
     addExercise,
     adding,
@@ -31,18 +27,32 @@ export function ExerciseBasket() {
     updateExercise,
   } = useBasketBuilder();
 
-  const difficulty = scoreProgram(exercises);
+  const difficulty = useMemo(() => scoreProgram(exercises), [exercises]);
   const draft = adding ?? editing;
 
-  /** routing */
   const router = useRouter();
   const [ready, setReady] = useQueryState(
     QUERY_KEYS.ready,
     parseAsBoolean.withDefault(false).withOptions({ shallow: true }),
   );
 
-  /** callbacks */
   const onSubmit = useCallback(() => setReady(true), [setReady]);
+  const onCloseReady = useCallback(() => setReady(false), [setReady]);
+  const onStartNow = useCallback(
+    () => router.push(uiRoutes.runProgram(exercises)),
+    [exercises, router],
+  );
+  const onAddExerciseToProgram = useCallback(
+    (tuned: Exercise) => {
+      if (adding) {
+        addExercise(tuned);
+      } else if (isNumber(editingIndex)) {
+        updateExercise(editingIndex, tuned);
+      }
+      closeDraft();
+    },
+    [adding, addExercise, closeDraft, editingIndex, updateExercise],
+  );
 
   return (
     <section id="home">
@@ -71,8 +81,8 @@ export function ExerciseBasket() {
       {ready && (
         <ReadyDialog
           exercises={exercises}
-          onClose={() => setReady(false)}
-          onStartNow={() => router.push(uiRoutes.runProgram(exercises))}
+          onClose={onCloseReady}
+          onStartNow={onStartNow}
         />
       )}
 
@@ -80,14 +90,7 @@ export function ExerciseBasket() {
         <ConfigDialog
           exercise={draft}
           key={adding ? `adding:${draft.type}` : `editing:${editingIndex}`}
-          onAddExerciseToProgram={(tuned: Exercise) => {
-            if (adding) {
-              addExercise(tuned);
-            } else if (isNumber(editingIndex)) {
-              updateExercise(editingIndex, tuned);
-            }
-            closeDraft();
-          }}
+          onAddExerciseToProgram={onAddExerciseToProgram}
           onClose={closeDraft}
           submitLabel={adding ? 'Add to program' : 'Save changes'}
         />

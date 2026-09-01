@@ -11,8 +11,7 @@ import {
   ProgramSchema,
 } from '../schema/types';
 
-// the typecast here is a little gross, but it's a necessary evil because Object.entries()
-// widens the key type to be just "string"
+// Object.entries widens the key type to string, hence the cast.
 const ENCODED_EXERCISE_FIELDS_ENTRIES = Object.entries(
   ENCODED_EXERCISE_FIELDS,
 ) as [keyof typeof ENCODED_EXERCISE_FIELDS, number][];
@@ -24,8 +23,6 @@ function toWire(exercise: Exercise): EncodedExercise {
   ) as unknown as EncodedExercise;
 
   for (const [exerciseKey, tupleSlot] of ENCODED_EXERCISE_FIELDS_ENTRIES) {
-    // also gross is the typecast here, but it's runtime-safe and a small price to pay
-    // for having less verbose code
     (wire as unknown[])[tupleSlot] = exercise[exerciseKey];
   }
 

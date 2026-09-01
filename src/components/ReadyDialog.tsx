@@ -5,14 +5,9 @@ import { Button } from '@primereact/ui/button';
 import type { DialogRootChangeEvent } from '@primereact/ui/dialog';
 import { Dialog } from '@primereact/ui/dialog';
 import { InputText } from '@primereact/ui/inputtext';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCopyToClipboard } from 'usehooks-ts';
-import {
-  formatDifficultyScore,
-  scoreProgram,
-  totalDuration,
-} from '../lib/difficulty';
-import { formatDuration } from '../lib/format';
+import { formatProgramSummary } from '../lib/format';
 import type { Exercise } from '../schema/types';
 
 export type ReadyDialogProps = {
@@ -28,14 +23,11 @@ export function ReadyDialog({
   onClose,
   onStartNow,
 }: ReadyDialogProps) {
-  /** hooks */
   const [, copy] = useCopyToClipboard();
 
-  /** state */
   const [copied, setCopied] = useState(false);
   const [shareLink, setShareLink] = useState('');
 
-  /** effects */
   useEffect(() => {
     setShareLink(window.location.href);
   }, []);
@@ -47,20 +39,21 @@ export function ReadyDialog({
     return () => clearTimeout(timer);
   }, [copied]);
 
-  const summary = [
-    `${exercises.length} ${exercises.length === 1 ? 'exercise' : 'exercises'}`,
-    formatDuration(totalDuration(exercises)),
-    `difficulty ${formatDifficultyScore(scoreProgram(exercises))}`,
-  ].join(' · ');
+  const summary = useMemo(() => formatProgramSummary(exercises), [exercises]);
+
+  const copyShareLink = useCallback(async () => {
+    setCopied(await copy(shareLink));
+  }, [copy, shareLink]);
+
+  const onOpenChange = useCallback(
+    (event: DialogRootChangeEvent) => {
+      if (!event.value) onClose();
+    },
+    [onClose],
+  );
 
   return (
-    <Dialog.Root
-      modal
-      onOpenChange={(event: DialogRootChangeEvent) => {
-        if (!event.value) onClose();
-      }}
-      open
-    >
+    <Dialog.Root modal onOpenChange={onOpenChange} open>
       <Dialog.Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -77,15 +70,13 @@ export function ReadyDialog({
                   rounded
                   variant="text"
                 >
-                  <XIcon />
+                  <XIcon aria-hidden />
                 </Dialog.Close>
               </Dialog.HeaderActions>
             </Dialog.Header>
 
             <Dialog.Content className="flex flex-col gap-4">
-              <p className="font-mono text-[13px] text-muted-color">
-                {summary}
-              </p>
+              <p className="font-mono text-tight text-muted-color">{summary}</p>
 
               <div className="flex flex-wrap items-center gap-2.5">
                 <Button onClick={onStartNow}>Start now</Button>
@@ -99,7 +90,7 @@ export function ReadyDialog({
               </div>
 
               <div className="flex flex-col gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-color">
+                <span className="font-mono text-tag uppercase tracking-wider text-muted-color">
                   Shareable link
                 </span>
                 <div className="flex items-center gap-2">
@@ -110,9 +101,7 @@ export function ReadyDialog({
                     value={shareLink}
                   />
                   <Button
-                    onClick={() => {
-                      copy(shareLink).then((ok) => setCopied(ok));
-                    }}
+                    onClick={copyShareLink}
                     severity="secondary"
                     variant="outlined"
                   >

@@ -5,6 +5,7 @@ import {
   ExerciseSpeedSchema,
 } from '../schema/types';
 import { PALETTES } from './palettes';
+import { totalDuration } from './program';
 import { numericBounds } from './schemaBounds';
 
 type ScoreInput = {
@@ -14,10 +15,7 @@ type ScoreInput = {
   weight: number;
 };
 
-/**
- * Normalises a tuned field against its own schema range, so widening a field
- * cannot silently skew every score. Throws at module load.
- */
+/** Normalises against the field's own schema range, so widening a field cannot skew every score. */
 function scaledBySchema(
   schema: Parameters<typeof numericBounds>[0],
   readVal: (exercise: Exercise) => number,
@@ -28,10 +26,7 @@ function scaledBySchema(
     Math.min(1, Math.max(0, (readVal(exercise) - min) / (max - min)));
 }
 
-/**
- * Every input that moves the score, with how to read it. Adding one is a single
- * entry here and nothing else.
- */
+/** Every input that moves the score; adding one is a single entry here. */
 const SCORE_INPUTS = {
   backgroundNoise: {
     scale: (exercise) => (exercise.backgroundNoise ? 1 : 0),
@@ -91,10 +86,6 @@ export function scoreExercise(exercise: Exercise): number {
   );
 }
 
-export function totalDuration(program: Program): number {
-  return program.reduce((total, exercise) => total + exercise.duration, 0);
-}
-
 /**
  * Duration-weighted mean, so a long gentle exercise counts for more than a
  * short brutal one. An empty program scores zero rather than the 1 floor a
@@ -116,8 +107,4 @@ export function toDifficultyBand(score: number): DifficultyBand {
   return (
     BAND_CEILINGS.find(({ ceiling }) => score < ceiling)?.band ?? 'intense'
   );
-}
-
-export function formatDifficultyScore(score: number) {
-  return score.toFixed(1);
 }

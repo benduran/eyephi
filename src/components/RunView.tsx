@@ -1,21 +1,20 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { useBasketBuilder } from '../context/BasketBuilder';
 import { useRunProgram } from '../context/RunProgram';
-import { totalDuration } from '../lib/difficulty';
 import { formatDuration } from '../lib/format';
-import { Centering } from './centering';
+import { totalDuration } from '../lib/program';
+import { Centering } from './Centering';
 import { ExerciseCanvas } from './ExerciseCanvas';
 import { ProgramProgressBar } from './ProgramProgressBar';
 import { RunControls } from './RunControls';
 import { RunStepList } from './RunStepList';
 
 export function RunView() {
-  /** context */
   const { exercises } = useBasketBuilder();
   const {
     current,
-    immersive,
     paused,
     previousStep,
     progress,
@@ -25,6 +24,9 @@ export function RunView() {
     exitRun,
     togglePaused,
   } = useRunProgram();
+
+  const total = useMemo(() => totalDuration(exercises), [exercises]);
+  const enterImmersive = useCallback(() => setImmersive(true), [setImmersive]);
 
   if (!current) return null;
 
@@ -48,10 +50,7 @@ export function RunView() {
             </div>
 
             <ProgramProgressBar
-              progress={{
-                elapsed: Math.round(progress.totalElapsed),
-                total: totalDuration(exercises),
-              }}
+              progress={{ elapsed: progress.totalElapsed, total }}
               trailing={`${progress.stepIndex + 1} / ${exercises.length}`}
             />
 
@@ -65,11 +64,11 @@ export function RunView() {
 
             <div className="flex flex-col gap-2.5">
               <RunControls
-                immersive={immersive}
+                immersive={false}
                 onBack={previousStep}
                 onExit={exitRun}
                 onSkip={skipStep}
-                onToggleImmersive={() => setImmersive(true)}
+                onToggleImmersive={enterImmersive}
                 onTogglePaused={togglePaused}
                 paused={paused}
               />

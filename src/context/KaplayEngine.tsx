@@ -11,7 +11,7 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import type { Nullish } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 type KaplayEngineContextVal = {
   /** Moves the engine's canvas into `host`, creating the engine on first use. */
@@ -26,11 +26,9 @@ const context = createContext<Nullish<KaplayEngineContextVal>>(null);
 const MAX_DEVICE_PIXEL_RATIO = 2;
 
 export function KaplayEngineProvider({ children }: PropsWithChildren) {
-  /** refs */
   const engineRef = useRef<Nullish<KAPLAYCtx>>(null);
   const parkRef = useRef<HTMLDivElement>(null);
 
-  /** callbacks */
   const attach = useCallback((host: HTMLElement) => {
     engineRef.current ??= kaplay({
       backgroundAudio: false,
@@ -55,7 +53,6 @@ export function KaplayEngineProvider({ children }: PropsWithChildren) {
     if (canvas && parkRef.current) parkRef.current.appendChild(canvas);
   }, []);
 
-  /** effects */
   useEffect(
     () => () => {
       engineRef.current?.quit();
@@ -64,7 +61,6 @@ export function KaplayEngineProvider({ children }: PropsWithChildren) {
     [],
   );
 
-  /** provider val */
   const providerVal = useMemo<KaplayEngineContextVal>(
     () => ({ attach, detach }),
     [attach, detach],

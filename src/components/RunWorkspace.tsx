@@ -5,13 +5,12 @@ import Link from 'next/link';
 import { useBasketBuilder } from '../context/BasketBuilder';
 import { useRunProgram } from '../context/RunProgram';
 import { uiRoutes } from '../routing/uiRoutes';
-import { Centering } from './centering';
+import { Centering } from './Centering';
 import { DoneView } from './DoneView';
 import { ImmersiveStage } from './ImmersiveStage';
 import { RunView } from './RunView';
 
 export function RunWorkspace() {
-  /** context */
   const { exercises } = useBasketBuilder();
   const { immersive, view } = useRunProgram();
 

@@ -1,7 +1,5 @@
-'use client';
-
-import { formatDifficultyScore, scoreProgram } from '../lib/difficulty';
-import { formatDuration } from '../lib/format';
+import { scoreProgram } from '../lib/difficulty';
+import { formatDifficultyScore, formatDuration } from '../lib/format';
 import type { Exercise } from '../schema/types';
 
 export type RunStepListProps = {
@@ -25,7 +23,7 @@ export function RunStepList({ currentIndex, exercises }: RunStepListProps) {
                 ? 'bg-surface-100 font-medium dark:bg-surface-800'
                 : 'text-muted-color'
             }`}
-            // Position in the program is a step's only identity, so it is the key.
+            // Position in the program is an entry's only identity.
             key={`${exercise.type}-${index}`}
           >
             <span className="font-mono text-xs">{index + 1}</span>

@@ -4,8 +4,9 @@ import type { GameObj, KAPLAYCtx } from 'kaplay';
 import { useEffect, useRef, useState } from 'react';
 import { useKaplayEngine } from '../context/KaplayEngine';
 import { PALETTES } from '../lib/palettes';
-import type { Exercise, Nullish, TargetPath } from '../schema/types';
+import type { Exercise, TargetPath } from '../schema/types';
 import { DEFAULT_TARGET_PATH } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 export type ExerciseCanvasProps = {
   className?: string | undefined;
@@ -20,10 +21,7 @@ type Axis = 'horizontal' | 'vertical';
 /** Reads the exercise being drawn, so a slider moves the drill without a rebuild. */
 type ReadExercise = () => Exercise;
 
-/**
- * Stage geometry for the current frame, in Kaplay's logical pixels. Derived
- * rather than stored so a resize needs no rebuild.
- */
+/** Stage geometry for the current frame, derived rather than stored so a resize needs no rebuild. */
 type Metrics = {
   /** Half the target's travel, before any per-axis clamping. */
   amp: number;
@@ -137,10 +135,7 @@ type TargetShape = {
   guideAxis: Nullish<Axis>;
   /** How many fixation points a saccade snaps between on this shape. */
   stops: number;
-  /**
-   * Where fixation `stop` sits. Only needed when even sampling of the phase
-   * would revisit the same point, as it does on a path that retraces itself.
-   */
+  /** Only needed where even phase sampling would revisit a point, as on a path that retraces itself. */
   stopAt?: (
     stop: number,
     stops: number,
@@ -154,10 +149,7 @@ const circleAt = (phase: number, m: Metrics) => ({
   y: m.cy + liftOf(m) * Math.sin(phase),
 });
 
-/**
- * Fixation points sit half a step in, so a two-stop line lands on its ends
- * rather than twice through the middle.
- */
+/** Half a step in, so a two-stop line lands on its ends rather than twice through the middle. */
 const stopPhase = (stop: number, stops: number) =>
   ((stop + 0.5) * 2 * Math.PI) / stops;
 
@@ -423,16 +415,16 @@ function buildDynamicVisualAcuity(stage: Stage): void {
       [-size / 2, size / 2 - bar, size, bar],
     ];
 
-    bars.forEach((stroke, index) => {
+    for (const [index, stroke] of bars.entries()) {
       const spec = layout[index];
-      if (!spec) return;
+      if (!spec) continue;
       const [x, y, width, height] = spec;
 
       stroke.color = foregroundOf(k, exercise);
       stroke.width = width;
       stroke.height = height;
       stroke.pos = k.vec2(x, y);
-    });
+    }
   });
 }
 
@@ -454,7 +446,7 @@ function buildOptokinetic(stage: Stage): void {
   const well = addDisc(stage);
   const target = addDisc(stage);
 
-  stripes.forEach((stripe, index) => {
+  for (const [index, stripe] of stripes.entries()) {
     stripe.onUpdate(() => {
       const exercise = read();
       const m = metrics(k, exercise);
@@ -467,7 +459,7 @@ function buildOptokinetic(stage: Stage): void {
       stripe.height = m.h;
       stripe.pos = k.vec2(-stride + offset + index * stride, 0);
     });
-  });
+  }
 
   well.onUpdate(() => {
     const exercise = read();
@@ -528,13 +520,7 @@ function buildBackgroundNoise(stage: Stage): void {
   }
 }
 
-/**
- * generates a unique key for the stage.
- * when this changes, it indicates that
- * the kaplay stage should be disposed because
- * the exercise is different enough to not reuse
- * things
- */
+/** Changing this means the drill differs structurally and its objects must be rebuilt. */
 const stageSignature = (exercise: Exercise) =>
   [exercise.type, exercise.backgroundNoise, pathOf(exercise)].join('|');
 
@@ -543,17 +529,13 @@ export function ExerciseCanvas({
   exercise,
   paused = false,
 }: ExerciseCanvasProps) {
-  /** state */
   const [wrapper, setWrapper] = useState<HTMLDivElement | null>(null);
 
-  /** context */
   const { attach, detach } = useKaplayEngine();
 
-  /** refs */
   const exerciseRef = useRef(exercise);
   const pausedRef = useRef(paused);
 
-  /** effects */
   useEffect(() => {
     exerciseRef.current = exercise;
     pausedRef.current = paused;

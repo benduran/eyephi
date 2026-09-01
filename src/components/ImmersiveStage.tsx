@@ -1,16 +1,16 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { useBasketBuilder } from '../context/BasketBuilder';
 import { useRunProgram } from '../context/RunProgram';
-import { totalDuration } from '../lib/difficulty';
 import { formatDuration } from '../lib/format';
+import { totalDuration } from '../lib/program';
 import { ExerciseCanvas } from './ExerciseCanvas';
-import { EyePhiLogo } from './eyePhiLogo';
+import { EyePhiLogo } from './EyePhiLogo';
 import { ProgramProgressBar } from './ProgramProgressBar';
 import { RunControls } from './RunControls';
 
 export function ImmersiveStage() {
-  /** context */
   const { exercises } = useBasketBuilder();
   const {
     current,
@@ -24,9 +24,10 @@ export function ImmersiveStage() {
     togglePaused,
   } = useRunProgram();
 
-  if (!current) return null;
+  const total = useMemo(() => totalDuration(exercises), [exercises]);
+  const leaveImmersive = useCallback(() => setImmersive(false), [setImmersive]);
 
-  const total = totalDuration(exercises);
+  if (!current) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -58,7 +59,7 @@ export function ImmersiveStage() {
           onBack={previousStep}
           onExit={exitRun}
           onSkip={skipStep}
-          onToggleImmersive={() => setImmersive(false)}
+          onToggleImmersive={leaveImmersive}
           onTogglePaused={togglePaused}
           paused={paused}
         />

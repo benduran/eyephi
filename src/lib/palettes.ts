@@ -45,5 +45,3 @@ export const PALETTES = {
     stimulation: 0.92,
   },
 } satisfies Record<ColorScheme, Palette>;
-
-export const DEFAULT_COLOR_SCHEME: ColorScheme = 'soft_mono';

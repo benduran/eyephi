@@ -3,8 +3,8 @@
 import { Button } from '@primereact/ui/button';
 import Link from 'next/link';
 import { uiRoutes } from '../routing/uiRoutes';
-import type { Nullish } from '../schema/types';
-import { ThemeToggle } from './themeToggle';
+import type { Nullish } from '../util/nullish';
+import { ThemeToggle } from './ThemeToggle';
 
 export type HeaderProgramActionsProps = {
   /**

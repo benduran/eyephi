@@ -1,14 +1,7 @@
 'use client';
 
 import { ArrowRightIcon } from '@phosphor-icons/react/dist/ssr';
-import {
-  CardBody,
-  CardCaption,
-  CardFooter,
-  CardRoot,
-  CardSubtitle,
-  CardTitle,
-} from '@primereact/ui/card';
+import { Card } from '@primereact/ui/card';
 import Link from 'next/link';
 import { useBasketBuilder } from '../context/BasketBuilder';
 import { formatDuration } from '../lib/format';
@@ -21,7 +14,6 @@ type ExerciseCardProps = {
 };
 
 export function ExerciseCard({ exercise }: ExerciseCardProps) {
-  /** context */
   const { exercises } = useBasketBuilder();
 
   const { blurb, category, displayName, duration, type } = exercise;
@@ -30,32 +22,32 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
       className="group flex flex-col"
       href={uiRoutes.basketBuilderAdd(type, exercises)}
     >
-      <CardRoot className="border-2 border-transparent grow transition-colors group-hover:border-primary">
-        <CardBody className="flex flex-col grow justify-between">
-          <CardCaption>
+      <Card.Root className="border-2 border-transparent grow transition-colors group-hover:border-primary">
+        <Card.Body className="flex flex-col grow justify-between">
+          <Card.Caption>
             <div className="flex items-baseline justify-between gap-3">
-              <CardTitle>{displayName}</CardTitle>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-color whitespace-nowrap">
+              <Card.Title>{displayName}</Card.Title>
+              <span className="font-mono text-tag uppercase tracking-wider text-muted-color whitespace-nowrap">
                 {toCategoryLabel(category)}
               </span>
             </div>
-            <CardSubtitle>
+            <Card.Subtitle>
               <span className="text-sm">{blurb}</span>
-            </CardSubtitle>
-          </CardCaption>
-          <CardFooter>
-            <div className="flex items-center justify-between border-t border-t-gray-200 text-sm text-muted-color dark:border-t-gray-700 pt-3">
+            </Card.Subtitle>
+          </Card.Caption>
+          <Card.Footer>
+            <div className="flex items-center justify-between border-t border-surface-200 text-sm text-muted-color dark:border-surface-700 pt-3">
               <span className="font-mono text-xs">
                 {formatDuration(duration)} default
               </span>
               <span className="inline-flex items-center gap-1">
                 Configure
-                <ArrowRightIcon />
+                <ArrowRightIcon aria-hidden />
               </span>
             </div>
-          </CardFooter>
-        </CardBody>
-      </CardRoot>
+          </Card.Footer>
+        </Card.Body>
+      </Card.Root>
     </Link>
   );
 }

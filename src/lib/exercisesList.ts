@@ -23,11 +23,7 @@ const BASE_DEFAULTS = {
 
 type SharedTuningKey = keyof typeof BASE_DEFAULTS;
 
-/**
- * Copy, plus any shared tuning worth overriding, plus whatever a specific
- * exercise requires that the shared defaults cannot supply. That last part is
- * what makes omitting Smooth Pursuit's path a compile error.
- */
+/** Copy, optional shared-tuning overrides, and anything the shared defaults cannot supply -- which is what makes omitting Smooth Pursuit's path a compile error. */
 type ExerciseOverride<T extends ExerciseType> = Pick<
   ExerciseDefaults<T>,
   CopyKey & keyof ExerciseDefaults<T>
@@ -129,11 +125,25 @@ const ALL_EXERCISES_DEFAULTS: Exercise[] = ExerciseSchema.array().parse(
   })),
 );
 
-/**
- * we are "faking" returning data on a delay like it was being fetched
- * from a real API by introducing a randomized delay, up to 3 seconds
- */
-export async function fetchAllExerciseDefaults() {
-  await setTimeout(Math.max(1, Math.floor(Math.random() * 4)) * 1000);
+const MIN_FAKE_LATENCY_MS = 1000;
+const MAX_FAKE_LATENCY_MS = 3000;
+
+type ExerciseDefaultsDeps = {
+  /** Stands in for network latency so the page's loading states get exercised. */
+  wait: () => Promise<unknown>;
+};
+
+const defaultDeps = (): ExerciseDefaultsDeps => ({
+  wait: () =>
+    setTimeout(
+      MIN_FAKE_LATENCY_MS +
+        Math.random() * (MAX_FAKE_LATENCY_MS - MIN_FAKE_LATENCY_MS),
+    ),
+});
+
+export async function fetchAllExerciseDefaults(
+  deps: ExerciseDefaultsDeps = defaultDeps(),
+): Promise<Exercise[]> {
+  await deps.wait();
   return ALL_EXERCISES_DEFAULTS;
 }

@@ -25,7 +25,8 @@ import {
   IDLE_RUN_PROGRESS,
   ProgramViewSchema,
 } from '../schema/runProgram';
-import type { Exercise, Nullish } from '../schema/types';
+import type { Exercise } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 type RunProgramContextVal = {
   current: Nullish<Exercise>;
@@ -61,7 +62,6 @@ export function RunProgramProvider({
   children,
   exercises,
 }: RunProgramProviderProps) {
-  /** hooks */
   const router = useRouter();
   const [view, setView] = useQueryState(
     QUERY_KEYS.view,
@@ -74,7 +74,6 @@ export function RunProgramProvider({
     parseAsBoolean.withDefault(true).withOptions({ shallow: true }),
   );
 
-  /** state */
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState<RunProgress>(IDLE_RUN_PROGRESS);
 
@@ -82,7 +81,6 @@ export function RunProgramProvider({
   const running = view === 'run' && !paused && Boolean(current);
   const remaining = remainingOnStep(progress, exercises);
 
-  /** callbacks */
   const applyTick = useCallback(
     (tick: RunTick) => {
       if (tick.kind === 'idle') return;
@@ -98,7 +96,6 @@ export function RunProgramProvider({
     running ? TICK_MS : null,
   );
 
-  /** provider val */
   const providerVal = useMemo<RunProgramContextVal>(
     () => ({
       current,

@@ -2,6 +2,7 @@
 
 import type { SliderRootChangeEvent } from '@primereact/ui/slider';
 import { Slider } from '@primereact/ui/slider';
+import { useCallback } from 'react';
 import { isNumber } from '../util/isNumber';
 
 export type SliderFieldProps = {
@@ -27,6 +28,13 @@ export function SliderField({
   value,
   valueLabel,
 }: SliderFieldProps) {
+  const onValueChange = useCallback(
+    (event: SliderRootChangeEvent) => {
+      if (isNumber(event.value)) onChange(event.value);
+    },
+    [onChange],
+  );
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-2.5">
@@ -42,9 +50,7 @@ export function SliderField({
       <Slider.Root
         max={max}
         min={min}
-        onValueChange={(event: SliderRootChangeEvent) => {
-          if (isNumber(event.value)) onChange(event.value);
-        }}
+        onValueChange={onValueChange}
         step={step}
         value={value}
       >

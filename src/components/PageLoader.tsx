@@ -1,3 +1,6 @@
+// Flat exports, not the `ProgressSpinner.*` namespace every client component
+// uses: a namespace object collapses to one client reference across the RSC
+// boundary, so a server component reading `.Root` off it gets undefined.
 import {
   ProgressSpinnerRange,
   ProgressSpinnerRoot,

@@ -2,8 +2,9 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import type { PropsWithChildren } from 'react';
-import { AppHeader } from '../components/appHeader';
+import { AppHeader } from '../components/AppHeader';
 import { Providers } from '../context/providers';
+import { THEME_BOOTSTRAP_SCRIPT } from '../lib/theme';
 
 export const metadata: Metadata = {
   description:
@@ -14,6 +15,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html className="h-full" lang="en" suppressHydrationWarning>
+      <head>
+        {/* Inline and blocking: a stored theme has to land before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
+      </head>
       <body className="min-h-full">
         <Providers>
           <AppHeader />

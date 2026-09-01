@@ -3,6 +3,7 @@
 import { ToggleButton } from '@primereact/ui/togglebutton';
 import type { ToggleButtonGroupValueChangeEvent } from '@primereact/ui/togglebuttongroup';
 import { ToggleButtonGroup } from '@primereact/ui/togglebuttongroup';
+import { useCallback } from 'react';
 import { toTargetPathLabel } from '../lib/labels';
 import type { TargetPath } from '../schema/types';
 import { TargetPathSchema } from '../schema/types';
@@ -16,13 +17,18 @@ export function TargetPathChooser({
   onSelect,
   selected,
 }: TargetPathChooserProps) {
+  const onValueChange = useCallback(
+    (event: ToggleButtonGroupValueChangeEvent) => {
+      const next = TargetPathSchema.safeParse(event.value);
+      if (next.success) onSelect(next.data);
+    },
+    [onSelect],
+  );
+
   return (
     <ToggleButtonGroup
       className="grid! grid-cols-2 gap-2.5 catalog:grid-cols-3"
-      onValueChange={(event: ToggleButtonGroupValueChangeEvent) => {
-        const next = TargetPathSchema.safeParse(event.value);
-        if (next.success) onSelect(next.data);
-      }}
+      onValueChange={onValueChange}
       value={selected}
     >
       {TargetPathSchema.options.map((path) => (

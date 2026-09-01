@@ -1,26 +1,20 @@
 'use client';
 
 import { Button } from '@primereact/ui/button';
+import { useMemo } from 'react';
 import { useBasketBuilder } from '../context/BasketBuilder';
 import { useRunProgram } from '../context/RunProgram';
-import {
-  formatDifficultyScore,
-  scoreProgram,
-  totalDuration,
-} from '../lib/difficulty';
-import { formatDuration } from '../lib/format';
-import { Centering } from './centering';
+import { formatProgramSummary } from '../lib/format';
+import { Centering } from './Centering';
 
 export function DoneView() {
-  /** context */
   const { exercises } = useBasketBuilder();
   const { restartRun, exitRun } = useRunProgram();
 
-  const summary = [
-    `${exercises.length} ${exercises.length === 1 ? 'exercise' : 'exercises'}`,
-    formatDuration(totalDuration(exercises)),
-    `overall difficulty ${formatDifficultyScore(scoreProgram(exercises))}`,
-  ].join(' · ');
+  const summary = useMemo(
+    () => formatProgramSummary(exercises, 'overall difficulty'),
+    [exercises],
+  );
 
   return (
     <section id="done">

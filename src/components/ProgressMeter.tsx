@@ -2,13 +2,15 @@
 
 import { ProgressBar } from '@primereact/ui/progressbar';
 
+/** `inverted` renders light-on-dark for the immersive stage, which ignores the theme. */
+export type ProgressMeterTone = 'default' | 'inverted';
+
 export type ProgressMeterProps = {
   ariaLabel: string;
   className?: string | undefined;
   /** Track thickness in pixels; the design uses 3-5px depending on context. */
   thickness?: number | undefined;
-  /** `inverted` renders light-on-dark for the immersive stage, which ignores the theme. */
-  tone?: 'default' | 'inverted' | undefined;
+  tone?: ProgressMeterTone | undefined;
   value: number;
 };
 

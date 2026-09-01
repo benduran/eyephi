@@ -9,8 +9,10 @@ import {
   useMemo,
   useState,
 } from 'react';
-import type { Nullish, Theme } from '../schema/types';
+import { THEME_STORAGE_KEY } from '../lib/theme';
+import type { Theme } from '../schema/types';
 import { ThemeSchema } from '../schema/types';
+import type { Nullish } from '../util/nullish';
 
 type ThemeContextVal = {
   setTheme: (newTheme: Theme) => void;
@@ -18,24 +20,19 @@ type ThemeContextVal = {
 };
 const context = createContext<Nullish<ThemeContextVal>>(null);
 
-const STORAGE_KEY = 'eyephi-theme' as const;
-
 /** An explicit override, if the user ever picked one. Null means "follow the OS". */
 function readStoredTheme(): Nullish<Theme> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-
-    const parsed = ThemeSchema.safeParse(raw);
+    const parsed = ThemeSchema.safeParse(
+      localStorage.getItem(THEME_STORAGE_KEY),
+    );
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }
 }
 
-/**
- * What the browser is actually rendering at this very moment
- */
+/** What the browser is actually rendering at this very moment. */
 function readEffectiveTheme(): Theme {
   return getComputedStyle(document.documentElement).colorScheme === 'dark'
     ? 'dark'
@@ -49,29 +46,20 @@ function applyThemeToDocument(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-  /** hooks */
   const [theme, setThemeState] = useState<Theme>('light');
 
-  /** callbacks */
   const setTheme = useCallback((newTheme: Theme) => {
     applyThemeToDocument(newTheme);
     setThemeState(newTheme);
 
     try {
-      localStorage.setItem(STORAGE_KEY, newTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
     } catch {
       // Storage blocked -- the theme still applies, it just won't survive a reload.
     }
   }, []);
 
-  /** effects */
   useEffect(() => {
-    const stored = readStoredTheme();
-    if (stored) {
-      applyThemeToDocument(stored);
-    }
-    // setting theme is a synchronous op (the DOM will have fully painted by now)
-    // so we can read what theme the browser actually has live and use it as state
     setThemeState(readEffectiveTheme());
   }, []);
 
@@ -87,7 +75,6 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     return () => query.removeEventListener('change', sync);
   }, []);
 
-  /** provider val */
   const providerVal = useMemo<ThemeContextVal>(
     () => ({
       setTheme,

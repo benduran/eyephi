@@ -9,7 +9,6 @@ import { HeaderProgramActions } from './HeaderProgramActions';
  * isolated here and the boundary can fall back to the same buttons, inert.
  */
 export function HeaderProgramActionsFromUrl() {
-  /** hooks */
   const [encodedProgram] = useQueryState(QUERY_KEYS.program, parseAsString);
 
   return <HeaderProgramActions encodedProgram={encodedProgram} />;

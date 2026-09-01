@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { uiRoutes } from '../routing/uiRoutes';
-import { Centering } from './centering';
-import { EyePhiLogo } from './eyePhiLogo';
+import { Centering } from './Centering';
+import { EyePhiLogo } from './EyePhiLogo';
 import { HeaderProgramActions } from './HeaderProgramActions';
 import { HeaderProgramActionsFromUrl } from './HeaderProgramActionsFromUrl';
 

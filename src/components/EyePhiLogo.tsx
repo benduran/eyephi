@@ -1,5 +1,3 @@
-'use client';
-
 export type EyePhiLogoProps = {
   className?: string | undefined;
   size?: number | undefined;

@@ -7,11 +7,7 @@ import type { PropsWithChildren } from 'react';
 import { KaplayEngineProvider } from './KaplayEngine';
 import { ThemeProvider } from './ThemeProvider';
 
-/**
- * we have to stick to monochromatic themes here because the whole point
- * of the application is to *not* overwhelm people that are actively undergoing
- * rehab and are currently hyper-sensitive to visual noise
- */
+/** Monochrome only: patients in rehab are hyper-sensitive to visual noise. */
 const neutralRamp = {
   50: '{neutral.50}',
   100: '{neutral.100}',
