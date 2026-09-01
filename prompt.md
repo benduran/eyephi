@@ -1,11 +1,44 @@
-# EyePhi session transcript
+# EyePhi design session
 
-**Session date:** 2026-08-31
-**Repository:** `/Users/benjaminduran/dddddd/personal/eyephi`
-**Started at:** `16cf226 chore: groundwork`
-**Ended at:** `32b0441 feat(difficulty): score exercises and programs`, plus one uncommitted slice
+**Ben:**
+
+> Design for a monochromatic UI, using the latest primereact tailwind components and themes. This UI will allow users to build their own vestibular and VOR exercise program, where they can choose for a number of different off-the-shelf exercises that they can then customize (colors, intensity, duration) based on their rehabilitation desires. When they're building their exercise program, users should be able to have a "shopping cart" type of experience, where they can add various exercises to their basket (after adjusting the settings for each exercise). Each exercise should have  a difficulty score, which will be computed by an algorithm, based on the colors, duration, intensity and speed of the exercise's moving pieces. When each exercise gets added to their exercise basket, they should see each exercise's duration and difficulty, and these should sum up to show them the overall total length of their program and the overall difficulty level. Once they've submitted their exercise program, they should be prompted to either start the program now, or to copy their exercise program's unique, shareable link. I think the app needs to be minimalistic in design (because users who are going through vestibular rehabilitation are likely sensitive to visually busy designs), but there are a few things the user should ALWAYS be able to get to:
+>
+> 1. Activate / start their current exercise program
+> 2. create a new exercise program
+> 3. share their current program
+> 4. See that the application's name is "EyePhi" and has an eyeball icon as its logo (so the users know what website they're on)
+> 5. If they're currently going through their program, they should see the time elapsed into the program (and how much total time the program will take them). They should also be able to pause the program at any exercise (each exercise is a step in the program)
+>
+> Keep color usage to a minimum outside of the actual <canvas /> elements that will be holding the animated exercises the user is currently doing
+
+**Agent:**
+
+EyePhi is built as a single design component: near-monochrome shell (neutral grays, Helvetica, PrimeReact-style surfaces/borders/focus weights), with color confined to the exercise canvases.
+
+Build view: 8 vestibular/VOR exercises, filterable by category; configure dialog with duration/speed/intensity sliders, 4 canvas colour schemes, texture toggle, live animated preview, and a live difficulty score.
+
+Cart: per-exercise duration + difficulty bar, edit/remove, totals for length and duration-weighted overall difficulty.
+
+Submit → Start now / copy shareable link.
+
+Persistent header: logo + name, Start/Pause (primary), New, Share, and during a run the elapsed/total progress bar; run view adds step rail, pause, skip.
+
+Tweaks available: reduced motion, difficulty scoring model, default palette.
+
+> Created EyePhi.dc.html
+> Found issues — fixing…
+> Edited EyePhi.dc.html
+
+**Ben:**
+
+> ensure that this layout and application also works on mobile devices. Ideally, a user can use their phone in vertical mode to setup the exercises, but then either stay in vertical mode OR turn their phone horizontal to maximize the screenspace they have for the <canvas /> portion of their exercises
+>
+> I think you took this the wrong direction. you ended up focusing only on the mobile layout here. I need the original (the first) design / layout you implemented, which will be my desktop layout, but the UI needs to be responsive and properly adjust to the user's screen size and orientation
 
 ---
+
+# EyePhi session coding transcript
 
 ## Turn 1 — `/time-to-log-on`
 
