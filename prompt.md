@@ -1243,6 +1243,9 @@ type TunedKey =
   | keyof Pick<Extract<Exercise, { path: TargetPath }>, 'path'>;
 ```
 
+(Turn 7 below collapses this into shared types declared in `types.ts`, so the
+shipped version reads `TunedExerciseKey | PathTunedExerciseKey`.)
+
 `path` only exists on Smooth Pursuit and Saccades, so rather than special-casing
 it the loop applies each roll **by key presence** (`if (key in exercise)`), which
 keeps one uniform code path. Durations snap to the same 15-second steps the config
@@ -1265,6 +1268,108 @@ errors on a typo, an omission, and a path rolled from the wrong enum.
 
 End to end, a generated program encoded to a 241-character link, round-tripped
 identically, and rendered as five exercises in the panel.
+---
+
+## Turn 6 — kill the dev server
+
+**Ben:**
+
+> please kill your server so I can boot one up, myself, because I'm not seeing the
+> changes
+
+**Agent:** Found two Node processes still alive, both carrying this session's
+`CLAUDE_CODE_MESSAGING_TOKEN` in their environment, which identified both as
+agent-started: the current `next dev` pair on port 20202, and an orphaned
+`next-server` from an earlier run whose parent had already died. Killed all of
+them and confirmed the port was free with nothing matching `next` left.
+
+Flagged the likely cause of "not seeing the changes" as separate from the server
+itself: the agent had run `pnpm run build` several times while a dev server was
+up, and both write into `.next`, so production and dev artifacts sharing that
+directory can leave the dev server serving stale chunks. Suggested `rm -rf .next`
+if a fresh `pnpm run dev` still looked wrong, noting it is gitignored build cache.
+
+Then listed exactly what should be visible once it booted: the button at
+`ProgramPanel.tsx:51`, `replaceProgram` at `BasketBuilder.tsx:27,92`, and
+`src/lib/randomProgram.ts`, so a still-missing button could be distinguished from
+a button that renders but does nothing.
+
+---
+
+## Turn 7 — the key set was declared twice
+
+**Ben:**
+
+> type TunedKey and type RandomTuning feels duplicative to types declared in
+> `src/schema/types.ts`
+
+**Agent:** Correct, and it turned out to be a **three-way** duplication rather
+than two. The literal list `'backgroundNoise' | 'duration' | 'intensity' |
+'scheme' | 'speed'` appeared in `ENCODED_EXERCISE_FIELDS`, in `randomProgram`'s
+`TunedKey`, and — spotted only by grepping — in `difficulty.ts`'s `SCORE_INPUTS`,
+where it had been sitting since that file was written.
+
+Declared the key set once in `src/schema/types.ts`, next to `Exercise`:
+
+```ts
+export type TunedExerciseKey = keyof Pick<
+  Exercise,
+  'backgroundNoise' | 'duration' | 'intensity' | 'scheme' | 'speed'
+>;
+
+export type PathTunedExerciseKey = keyof Pick<
+  Extract<Exercise, { path: TargetPath }>,
+  'path'
+>;
+```
+
+All three consumers now derive from it. `difficulty.ts` collapsed from six lines
+to `} as const satisfies Record<TunedExerciseKey, ScoreInput>;`.
+
+Proved they were genuinely wired to one definition rather than three lists that
+happened to agree, by mutating the shared type and watching every consumer fail:
+
+```
++ 'weight'   difficulty.ts(56)  randomProgram.ts(76)  types.ts(132)
+- 'speed'    difficulty.ts(52)  randomProgram.ts(75)  types.ts(130)
+```
+
+A regression run confirmed the refactor changed no behaviour: 3,000 seeded
+programs still valid and distinct, counts still spanning 3 to 9, all schemes and
+paths still rolled, and the difficulty formula still matching the design's.
+
+---
+
+## Turn 8 — cite the algorithm
+
+**Ben:**
+
+> please provide a link to wikipedia or some other place that has a writeup of the
+> fisher-yates algo, since you added a comment about it on the shuffled() function
+
+**Agent:** Verified the URL resolved rather than pasting one from memory: both the
+encoded en-dash form and the plain-hyphen redirect return 200, the page title is
+`Fisher–Yates shuffle - Wikipedia`, and the `#The_modern_algorithm` anchor exists.
+
+Linked that **specific section** rather than the article root, because the article
+also documents Fisher and Yates' original 1938 pencil-and-paper method, which
+strikes elements out of a list and looks nothing like the loop in the code. The
+implementation here is the modern Durstenfeld form.
+
+```ts
+/**
+ * Fisher-Yates over a copy, so the catalogue is never mutated. This is the
+ * modern (Durstenfeld) form: walk down, swapping with a random earlier index.
+ * https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+ */
+```
+
+---
+
+## Turn 9 — the transcript
+
+**Ben:** Asked for the last few exchanges to be appended to `prompt.md`.
+
 
 ---
 
@@ -1276,6 +1381,7 @@ identically, and rendered as five exercises in the panel.
 | `CLAUDE.md` / `AGENTS.md` memoization rule corrected | `8eec6c5` |
 | PascalCase rename and module extractions committed | `8eec6c5` |
 | Random program generator and button | implemented |
+| Tuned-key types shared across three consumers | implemented |
 
 The instructive finding: a single line of guidance in `AGENTS.md` had been quietly
 steering every agent that read it toward stripping memoization. Fixing the
