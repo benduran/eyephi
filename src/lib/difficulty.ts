@@ -1,4 +1,9 @@
-import type { DifficultyBand, Exercise, Program } from '../schema/types';
+import type {
+  DifficultyBand,
+  Exercise,
+  Program,
+  TunedExerciseKey,
+} from '../schema/types';
 import {
   ExerciseDurationSchema,
   ExerciseIntensitySchema,
@@ -48,13 +53,7 @@ const SCORE_INPUTS = {
     scale: scaledBySchema(ExerciseSpeedSchema, (e) => e.speed),
     weight: 0.28,
   },
-} as const satisfies Record<
-  keyof Pick<
-    Exercise,
-    'backgroundNoise' | 'duration' | 'intensity' | 'scheme' | 'speed'
-  >,
-  ScoreInput
->;
+} as const satisfies Record<TunedExerciseKey, ScoreInput>;
 
 const SCORE_MIN = 1;
 const SCORE_MAX = 10;

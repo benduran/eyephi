@@ -106,6 +106,18 @@ export type Exercise = z.infer<typeof ExerciseSchema>;
 export const ProgramSchema = z.array(ExerciseSchema);
 export type Program = z.infer<typeof ProgramSchema>;
 
+/** The knobs a patient tunes, shared by the wire layout and the random generator. */
+export type TunedExerciseKey = keyof Pick<
+  Exercise,
+  'backgroundNoise' | 'duration' | 'intensity' | 'scheme' | 'speed'
+>;
+
+/** Tuned too, but only present on the drills that trace a path. */
+export type PathTunedExerciseKey = keyof Pick<
+  Extract<Exercise, { path: TargetPath }>,
+  'path'
+>;
+
 /** Bump when the tuple layout changes so stale links fail cleanly instead of decoding wrong. */
 export const PROGRAM_WIRE_VERSION = 1;
 
@@ -118,10 +130,7 @@ export const ENCODED_EXERCISE_FIELDS = {
   speed: 2,
   type: 0,
 } as const satisfies Record<
-  keyof Pick<
-    Exercise,
-    'backgroundNoise' | 'duration' | 'intensity' | 'scheme' | 'speed' | 'type'
-  >,
+  TunedExerciseKey | keyof Pick<Exercise, 'type'>,
   number
 >;
 

@@ -10,7 +10,7 @@ import type { PropsWithChildren } from 'react';
 import { createContext, useContext, useMemo } from 'react';
 import { decodeProgram, encodeExerciseProgram } from '../lib/programCodec';
 import { QUERY_KEYS } from '../routing/uiRoutes';
-import type { Exercise } from '../schema/types';
+import type { Exercise, Program } from '../schema/types';
 import type { Nullish } from '../util/nullish';
 
 type BasketBuilderContextVal = {
@@ -23,6 +23,7 @@ type BasketBuilderContextVal = {
   editingIndex: Nullish<number>;
   exercises: Exercise[];
   removeExercise: (exerciseIndex: number) => void;
+  replaceProgram: (program: Program) => void;
   setAdding: (exerciseType: Exercise['type']) => void;
   setEditing: (exerciseIndex: number) => void;
   updateExercise: (exerciseIndex: number, tuned: Exercise) => void;
@@ -87,6 +88,7 @@ export function BasketBuilderProvider({
       exercises,
       removeExercise: (exerciseIndex) =>
         setExercises((prev) => prev.toSpliced(exerciseIndex, 1)),
+      replaceProgram: (program) => setExercises(program),
       setAdding: (exerciseType) => {
         if (!addingIsValidExerciseType(exerciseType, defaultExercises)) return;
         setAdding(exerciseType);
