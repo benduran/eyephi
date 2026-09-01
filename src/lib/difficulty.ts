@@ -1,16 +1,11 @@
-import type {
-  DifficultyBand,
-  Exercise,
-  Nullish,
-  Program,
-} from '../schema/types';
+import type { DifficultyBand, Exercise, Program } from '../schema/types';
 import {
   ExerciseDurationSchema,
   ExerciseIntensitySchema,
   ExerciseSpeedSchema,
 } from '../schema/types';
-import { isNumber } from '../util/isNumber';
 import { PALETTES } from './palettes';
+import { numericBounds } from './schemaBounds';
 
 type ScoreInput = {
   /** Turns a tuned value into a 0-1 scale of this input's weight. */
@@ -20,23 +15,17 @@ type ScoreInput = {
 };
 
 /**
- * Reads the bounds off the schema rather than restating them, so widening a
- * field's range cannot silently skew every score. Throws at module load.
+ * Normalises a tuned field against its own schema range, so widening a field
+ * cannot silently skew every score. Throws at module load.
  */
 function scaledBySchema(
-  schema: { maxValue: Nullish<number>; minValue: Nullish<number> },
+  schema: Parameters<typeof numericBounds>[0],
   readVal: (exercise: Exercise) => number,
 ): ScoreInput['scale'] {
-  const { maxValue, minValue } = schema;
-  if (!isNumber(minValue) || !isNumber(maxValue) || minValue === maxValue) {
-    throw new Error('a scored field must declare a finite min and max');
-  }
+  const { max, min } = numericBounds(schema);
 
   return (exercise) =>
-    Math.min(
-      1,
-      Math.max(0, (readVal(exercise) - minValue) / (maxValue - minValue)),
-    );
+    Math.min(1, Math.max(0, (readVal(exercise) - min) / (max - min)));
 }
 
 /**

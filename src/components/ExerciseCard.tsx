@@ -22,8 +22,11 @@ type ExerciseCardProps = {
 export function ExerciseCard({ exercise }: ExerciseCardProps) {
   const { blurb, category, displayName, duration, type } = exercise;
   return (
-    <Link className="group" href={uiRoutes.basketBuilderAdd(type)}>
-      <CardRoot className="border-2 border-transparent transition-colors group-hover:border-primary">
+    <Link
+      className="group flex flex-col"
+      href={uiRoutes.basketBuilderAdd(type)}
+    >
+      <CardRoot className="border-2 border-transparent grow transition-colors group-hover:border-primary">
         <CardBody className="flex flex-col grow justify-between">
           <CardCaption>
             <div className="flex items-baseline justify-between gap-3">

@@ -6,6 +6,9 @@ import {
   toDifficultyBand,
   totalDuration,
 } from '../lib/difficulty';
+import type { Exercise } from '../schema/types';
+import { isNumber } from '../util/isNumber';
+import { ConfigDialog } from './ConfigDialog';
 import { Centering } from './centering';
 import { ExerciseCatalog } from './ExerciseCatalog';
 import { MobileSubmitBar } from './MobileSubmitBar';
@@ -13,12 +16,21 @@ import { ProgramPanel } from './ProgramPanel';
 
 export function ExerciseBasket() {
   /** context */
-  const { exercises } = useBasketBuilder();
+  const {
+    addExercise,
+    adding,
+    closeDraft,
+    editing,
+    editingIndex,
+    exercises,
+    updateExercise,
+  } = useBasketBuilder();
 
   // TODO(slice 7): opens the ready dialog once it exists.
   const onSubmit = () => undefined;
 
   const difficulty = scoreProgram(exercises);
+  const draft = adding ?? editing;
 
   return (
     <section id="home">
@@ -43,6 +55,23 @@ export function ExerciseBasket() {
           <ProgramPanel onSubmit={onSubmit} />
         </div>
       </Centering>
+
+      {draft && (
+        <ConfigDialog
+          exercise={draft}
+          key={adding ? `adding:${draft.type}` : `editing:${editingIndex}`}
+          onAddExerciseToProgram={(tuned: Exercise) => {
+            if (adding) {
+              addExercise(tuned);
+            } else if (isNumber(editingIndex)) {
+              updateExercise(editingIndex, tuned);
+            }
+            closeDraft();
+          }}
+          onClose={closeDraft}
+          submitLabel={adding ? 'Add to program' : 'Save changes'}
+        />
+      )}
 
       {exercises.length > 0 && (
         <MobileSubmitBar

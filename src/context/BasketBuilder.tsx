@@ -14,12 +14,16 @@ import type { Exercise, Nullish } from '../schema/types';
 type BasketBuilderContextVal = {
   adding: Nullish<Exercise>;
   addExercise: (exerciseToAdd: Exercise) => void;
+  /** Drops both draft keys, which is what closes the config dialog. */
+  closeDraft: () => void;
   defaultExercises: Exercise[];
   editing: Nullish<Exercise>;
+  editingIndex: Nullish<number>;
   exercises: Exercise[];
   removeExercise: (exerciseIndex: number) => void;
   setAdding: (exerciseType: Exercise['type']) => void;
   setEditing: (exerciseIndex: number) => void;
+  updateExercise: (exerciseIndex: number, tuned: Exercise) => void;
 };
 
 const context = createContext<Nullish<BasketBuilderContextVal>>(null);
@@ -71,8 +75,13 @@ export function BasketBuilderProvider({
       addExercise: (exerciseToAdd) =>
         setExercises((prev) => [...prev, exerciseToAdd]),
       adding: defaultExercises.find((ex) => ex.type === adding),
+      closeDraft: () => {
+        setAdding(null);
+        setEditing(null);
+      },
       defaultExercises,
       editing: exercises.find((_, i) => i === editing),
+      editingIndex: editing,
       exercises,
       removeExercise: (exerciseIndex) =>
         setExercises((prev) => prev.toSpliced(exerciseIndex, 1)),
@@ -81,6 +90,8 @@ export function BasketBuilderProvider({
         setAdding(exerciseType);
       },
       setEditing,
+      updateExercise: (exerciseIndex, tuned) =>
+        setExercises((prev) => prev.with(exerciseIndex, tuned)),
     }),
     [
       adding,
