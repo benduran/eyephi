@@ -23,6 +23,7 @@ import { ExerciseConfigBreakdown } from './ExerciseConfigBreakdown';
 import { PaletteChooser } from './PaletteChooser';
 import { ProgressMeter } from './progressMeter';
 import { SliderField } from './SliderField';
+import { TargetPathChooser } from './TargetPathChooser';
 
 export type ConfigDialogProps = {
   /** The exercise being tuned. Mount with a key so a new one resets the draft. */
@@ -127,6 +128,22 @@ export function ConfigDialog({
                   value={draft.intensity}
                   valueLabel={`${draft.intensity} / ${INTENSITY.max}`}
                 />
+
+                {'path' in draft && (
+                  <div className="flex flex-col gap-2.5">
+                    <span className="text-sm font-medium">
+                      Path
+                      <span className="font-normal text-muted-color">
+                        {' '}
+                        the shape the target traces
+                      </span>
+                    </span>
+                    <TargetPathChooser
+                      onSelect={(path) => updateDraft({ path })}
+                      selected={draft.path}
+                    />
+                  </div>
+                )}
 
                 <div className="flex flex-col gap-2.5">
                   <span className="text-sm font-medium">Color scheme</span>

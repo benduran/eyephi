@@ -72,10 +72,7 @@ export function ExerciseBasket() {
         <ReadyDialog
           exercises={exercises}
           onClose={() => setReady(false)}
-          onStartNow={() => {
-            setReady(false);
-            router.push(uiRoutes.runProgram(exercises));
-          }}
+          onStartNow={() => router.push(uiRoutes.runProgram(exercises))}
         />
       )}
 

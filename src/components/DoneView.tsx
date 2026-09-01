@@ -33,7 +33,7 @@ export function DoneView() {
           <div className="flex flex-wrap items-center justify-center gap-2.5">
             <Button onClick={restartRun}>Run again</Button>
             <Button onClick={exitRun} severity="secondary" variant="outlined">
-              Create a new program
+              Back to program editor
             </Button>
           </div>
         </div>

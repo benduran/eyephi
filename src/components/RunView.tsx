@@ -17,6 +17,7 @@ export function RunView() {
     current,
     immersive,
     paused,
+    previousStep,
     progress,
     remaining,
     setImmersive,
@@ -65,6 +66,7 @@ export function RunView() {
             <div className="flex flex-col gap-2.5">
               <RunControls
                 immersive={immersive}
+                onBack={previousStep}
                 onExit={exitRun}
                 onSkip={skipStep}
                 onToggleImmersive={() => setImmersive(true)}

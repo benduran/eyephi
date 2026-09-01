@@ -28,6 +28,24 @@ export function toNextStep(
 }
 
 /**
+ * Steps back one exercise. From the first step it restarts that step instead,
+ * which is what a back control does everywhere else.
+ */
+export function toPreviousStep(
+  progress: RunProgress,
+  program: Program,
+  totalElapsed: number,
+): RunTick {
+  if (program.length === 0) return { kind: 'idle' };
+
+  const stepIndex = Math.max(0, progress.stepIndex - 1);
+  return {
+    kind: 'running',
+    progress: { stepElapsed: 0, stepIndex, totalElapsed },
+  };
+}
+
+/**
  * Advances the clock by `delta` seconds, rolling onto the next step when the
  * current one is served. A step shorter than the delta still gets one tick.
  */

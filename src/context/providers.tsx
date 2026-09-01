@@ -4,6 +4,7 @@ import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { PropsWithChildren } from 'react';
+import { KaplayEngineProvider } from './KaplayEngine';
 import { ThemeProvider } from './ThemeProvider';
 
 /**
@@ -75,7 +76,9 @@ export function Providers({ children }: PropsWithChildren) {
   return (
     <NuqsAdapter>
       <PrimeReactProvider {...primereactConfig}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <KaplayEngineProvider>{children}</KaplayEngineProvider>
+        </ThemeProvider>
       </PrimeReactProvider>
     </NuqsAdapter>
   );

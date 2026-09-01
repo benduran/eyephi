@@ -15,6 +15,7 @@ export function ImmersiveStage() {
   const {
     current,
     paused,
+    previousStep,
     progress,
     remaining,
     setImmersive,
@@ -54,6 +55,7 @@ export function ImmersiveStage() {
         </div>
         <RunControls
           immersive
+          onBack={previousStep}
           onExit={exitRun}
           onSkip={skipStep}
           onToggleImmersive={() => setImmersive(false)}

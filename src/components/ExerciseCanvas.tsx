@@ -1,10 +1,11 @@
 'use client';
 
 import type { GameObj, KAPLAYCtx } from 'kaplay';
-import kaplay from 'kaplay';
 import { useEffect, useRef, useState } from 'react';
+import { useKaplayEngine } from '../context/KaplayEngine';
 import { PALETTES } from '../lib/palettes';
-import type { Exercise } from '../schema/types';
+import type { Exercise, Nullish, TargetPath } from '../schema/types';
+import { DEFAULT_TARGET_PATH } from '../schema/types';
 
 export type ExerciseCanvasProps = {
   className?: string | undefined;
@@ -12,9 +13,6 @@ export type ExerciseCanvasProps = {
   /** Holds the clock still without tearing the canvas down. */
   paused?: boolean | undefined;
 };
-
-/** Retina without paying for the 3x buffer some phones report. */
-const MAX_DEVICE_PIXEL_RATIO = 2;
 
 /** The axis a target travels along. Guide marks are drawn across it. */
 type Axis = 'horizontal' | 'vertical';
@@ -132,37 +130,144 @@ function addGuide(stage: Stage, axis: Axis, side: -1 | 1): void {
   });
 }
 
+type TargetShape = {
+  /** Where the target sits at `phase` radians into its cycle. */
+  at: (phase: number, m: Metrics) => { x: number; y: number };
+  /** Only a straight path has ends worth marking. */
+  guideAxis: Nullish<Axis>;
+  /** How many fixation points a saccade snaps between on this shape. */
+  stops: number;
+  /**
+   * Where fixation `stop` sits. Only needed when even sampling of the phase
+   * would revisit the same point, as it does on a path that retraces itself.
+   */
+  stopAt?: (
+    stop: number,
+    stops: number,
+    m: Metrics,
+  ) => { x: number; y: number };
+};
+
+/** Shared so the ping-pong variant can walk the same ring of points. */
+const circleAt = (phase: number, m: Metrics) => ({
+  x: m.cx + m.amp * Math.cos(phase),
+  y: m.cy + liftOf(m) * Math.sin(phase),
+});
+
+/**
+ * Fixation points sit half a step in, so a two-stop line lands on its ends
+ * rather than twice through the middle.
+ */
+const stopPhase = (stop: number, stops: number) =>
+  ((stop + 0.5) * 2 * Math.PI) / stops;
+
+/** Vertical reach, clamped like every other vertical travel on the stage. */
+const liftOf = (m: Metrics) => Math.min(m.amp, m.h * 0.35);
+
+const TARGET_SHAPES = {
+  circle: {
+    at: circleAt,
+    guideAxis: null,
+    stops: 6,
+  },
+  figure_eight: {
+    // Gerono's lemniscate: one horizontal sweep crossed by a doubled vertical.
+    at: (phase, m) => ({
+      x: m.cx + m.amp * Math.sin(phase),
+      y: m.cy + liftOf(m) * Math.sin(phase) * Math.cos(phase),
+    }),
+    guideAxis: null,
+    stops: 6,
+  },
+  horizontal: {
+    at: (phase, m) => ({ x: m.cx + m.amp * Math.sin(phase), y: m.cy }),
+    guideAxis: 'horizontal',
+    stops: 2,
+  },
+  ping_pong_circle: {
+    // The sweep eases to a stop at each end and retraces, so the lap angle
+    // itself rides a cosine rather than climbing forever.
+    at: (phase, m) => circleAt(Math.PI * (1 - Math.cos(phase)), m),
+    guideAxis: null,
+    stopAt: (stop, stops, m) => {
+      const ring = stops / 2 + 1;
+      const point = stop < ring ? stop : stops - stop;
+      return circleAt((point * 2 * Math.PI) / ring, m);
+    },
+    // Six points on the ring, walked out and back: 0..5 then 4..1.
+    stops: 10,
+  },
+  random: {
+    // Summed incommensurate sines: it never repeats within a session but stays
+    // reproducible, which a clinician comparing two runs needs.
+    at: (phase, m) => ({
+      x:
+        m.cx +
+        m.amp * (0.62 * Math.sin(phase) + 0.38 * Math.sin(1.7 * phase + 0.9)),
+      y:
+        m.cy +
+        liftOf(m) *
+          (0.62 * Math.cos(1.3 * phase) + 0.38 * Math.sin(2.3 * phase + 0.4)),
+    }),
+    guideAxis: null,
+    stops: 6,
+  },
+  vertical: {
+    at: (phase, m) => ({ x: m.cx, y: m.cy + liftOf(m) * Math.sin(phase) }),
+    guideAxis: 'vertical',
+    stops: 2,
+  },
+} as const satisfies Record<TargetPath, TargetShape>;
+
+/** Keyed off the field, so a new drill with a path needs no change here. */
+const pathOf = (exercise: Exercise): TargetPath =>
+  'path' in exercise ? exercise.path : DEFAULT_TARGET_PATH;
+
 function buildSmoothPursuit(stage: Stage): void {
   const { k, read, time } = stage;
-  addGuide(stage, 'horizontal', -1);
-  addGuide(stage, 'horizontal', 1);
+  const { guideAxis } = TARGET_SHAPES[pathOf(read())];
+  if (guideAxis) {
+    addGuide(stage, guideAxis, -1);
+    addGuide(stage, guideAxis, 1);
+  }
 
   const target = addDisc(stage);
   target.onUpdate(() => {
     const exercise = read();
     const m = metrics(k, exercise);
+    const shape = TARGET_SHAPES[pathOf(exercise)];
+    // k.wave() and the design both take radians, so a lap is 2*PI of phase.
+    const { x, y } = shape.at(2 * Math.PI * m.freq * time(), m);
 
     target.color = foregroundOf(k, exercise);
     target.radius = m.r;
-    target.pos = k.vec2(m.cx + k.wave(-m.amp, m.amp, time() * m.freq), m.cy);
+    target.pos = k.vec2(x, y);
   });
 }
 
-function buildHorizontalSaccades(stage: Stage): void {
+/** The same paths as Smooth Pursuit, sampled rather than glided along. */
+function buildSaccades(stage: Stage): void {
   const { k, read, time } = stage;
-  addGuide(stage, 'horizontal', -1);
-  addGuide(stage, 'horizontal', 1);
+  const { guideAxis } = TARGET_SHAPES[pathOf(read())];
+  if (guideAxis) {
+    addGuide(stage, guideAxis, -1);
+    addGuide(stage, guideAxis, 1);
+  }
 
   const target = addDisc(stage);
   target.onUpdate(() => {
     const exercise = read();
     const m = metrics(k, exercise);
+    const shape: TargetShape = TARGET_SHAPES[pathOf(exercise)];
     const interval = Math.max(0.28, 1.4 - exercise.speed * 0.11);
-    const left = Math.floor(time() / interval) % 2 === 0;
+    const stop = Math.floor(time() / interval) % shape.stops;
+    const { x, y } = shape.stopAt
+      ? shape.stopAt(stop, shape.stops, m)
+      : shape.at(stopPhase(stop, shape.stops), m);
 
     target.color = foregroundOf(k, exercise);
     target.radius = m.r;
-    target.pos = k.vec2(m.cx + (left ? -m.amp : m.amp), m.cy);
+    target.pos = k.vec2(x, y);
   });
 }
 
@@ -188,7 +293,9 @@ function buildNearFarConvergence(stage: Stage): void {
     const maxRadius = (14 + exercise.intensity * 4) * m.scale;
 
     target.color = foregroundOf(k, exercise);
-    target.radius = 8 * m.scale + k.wave(0, maxRadius, time() * m.freq * 0.5);
+    // Radians again: the convergence cycle is half the drill's frequency.
+    target.radius =
+      8 * m.scale + k.wave(0, maxRadius, Math.PI * m.freq * time());
     target.pos = k.vec2(m.cx, m.cy);
   });
 }
@@ -384,9 +491,9 @@ function buildOptokinetic(stage: Stage): void {
 
 const BUILDERS = {
   dynamic_visual_acuity: buildDynamicVisualAcuity,
-  horizontal_saccades: buildHorizontalSaccades,
   near_far_convergence: buildNearFarConvergence,
   optokinetic_stimulation: buildOptokinetic,
+  saccades: buildSaccades,
   smooth_pursuit: buildSmoothPursuit,
   vor_x1_horizontal: buildVorX1('horizontal'),
   vor_x1_vertical: buildVorX1('vertical'),
@@ -429,7 +536,7 @@ function buildBackgroundNoise(stage: Stage): void {
  * things
  */
 const stageSignature = (exercise: Exercise) =>
-  [exercise.type, exercise.backgroundNoise].join('|');
+  [exercise.type, exercise.backgroundNoise, pathOf(exercise)].join('|');
 
 export function ExerciseCanvas({
   className,
@@ -438,6 +545,9 @@ export function ExerciseCanvas({
 }: ExerciseCanvasProps) {
   /** state */
   const [wrapper, setWrapper] = useState<HTMLDivElement | null>(null);
+
+  /** context */
+  const { attach, detach } = useKaplayEngine();
 
   /** refs */
   const exerciseRef = useRef(exercise);
@@ -452,27 +562,15 @@ export function ExerciseCanvas({
   useEffect(() => {
     if (!wrapper) return;
 
-    // Kaplay makes its own canvas inside the host and sizes it to that box.
-    // Handing it ours instead would reuse one GL context across remounts.
-    const k = kaplay({
-      backgroundAudio: false,
-      global: false,
-      loadingScreen: false,
-      pixelDensity: Math.min(
-        MAX_DEVICE_PIXEL_RATIO,
-        window.devicePixelRatio || 1,
-      ),
-      root: wrapper,
-      touchToMouse: false,
-    });
-
+    const k = attach(wrapper);
     const read: ReadExercise = () => exerciseRef.current;
     // Own clock rather than k.time(), so a pause resumes where it froze.
     let elapsed = 0;
     const stage: Stage = { k, read, time: () => elapsed };
+    // Blank, so the first frame always builds the drill on a reused engine.
     let signature = '';
 
-    k.onUpdate(() => {
+    const frame = k.onUpdate(() => {
       if (!pausedRef.current) elapsed += k.dt();
 
       const current = read();
@@ -494,10 +592,11 @@ export function ExerciseCanvas({
     });
 
     return () => {
-      k.quit();
-      wrapper.replaceChildren();
+      frame.cancel();
+      k.destroyAll(STAGE_TAG);
+      detach();
     };
-  }, [wrapper]);
+  }, [attach, detach, wrapper]);
 
   return (
     <div

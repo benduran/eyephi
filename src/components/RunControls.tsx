@@ -4,6 +4,7 @@ import { Button } from '@primereact/ui/button';
 
 export type RunControlsProps = {
   immersive: boolean;
+  onBack: () => void;
   onExit: () => void;
   onSkip: () => void;
   onToggleImmersive: () => void;
@@ -13,6 +14,7 @@ export type RunControlsProps = {
 
 export function RunControls({
   immersive,
+  onBack,
   onExit,
   onSkip,
   onToggleImmersive,
@@ -21,6 +23,14 @@ export function RunControls({
 }: RunControlsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <Button
+        onClick={onBack}
+        severity="secondary"
+        size="small"
+        variant="outlined"
+      >
+        Previous
+      </Button>
       <Button onClick={onTogglePaused} size="small">
         {paused ? 'Resume' : 'Pause'}
       </Button>

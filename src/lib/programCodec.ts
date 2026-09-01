@@ -5,6 +5,7 @@ import {
 import type { EncodedExercise, Exercise, Program } from '../schema/types';
 import {
   ENCODED_EXERCISE_FIELDS,
+  ENCODED_TARGET_PATH_SLOT,
   EncodedProgramSchema,
   PROGRAM_WIRE_VERSION,
   ProgramSchema,
@@ -28,6 +29,10 @@ function toWire(exercise: Exercise): EncodedExercise {
     (wire as unknown[])[tupleSlot] = exercise[exerciseKey];
   }
 
+  if ('path' in exercise) {
+    (wire as unknown[])[ENCODED_TARGET_PATH_SLOT] = exercise.path;
+  }
+
   return wire;
 }
 
@@ -38,16 +43,19 @@ function fromWire(wire: EncodedExercise, catalog: Exercise[]): Exercise[] {
   );
   if (!definition) return [];
 
-  return [
-    {
-      ...definition,
-      backgroundNoise: wire[ENCODED_EXERCISE_FIELDS.backgroundNoise],
-      duration: wire[ENCODED_EXERCISE_FIELDS.duration],
-      intensity: wire[ENCODED_EXERCISE_FIELDS.intensity],
-      scheme: wire[ENCODED_EXERCISE_FIELDS.scheme],
-      speed: wire[ENCODED_EXERCISE_FIELDS.speed],
-    },
-  ];
+  const tuned: Exercise = {
+    ...definition,
+    backgroundNoise: wire[ENCODED_EXERCISE_FIELDS.backgroundNoise],
+    duration: wire[ENCODED_EXERCISE_FIELDS.duration],
+    intensity: wire[ENCODED_EXERCISE_FIELDS.intensity],
+    scheme: wire[ENCODED_EXERCISE_FIELDS.scheme],
+    speed: wire[ENCODED_EXERCISE_FIELDS.speed],
+  };
+
+  const path = wire[ENCODED_TARGET_PATH_SLOT];
+  if ('path' in tuned && path) tuned.path = path;
+
+  return [tuned];
 }
 
 /**

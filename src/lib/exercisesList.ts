@@ -1,16 +1,16 @@
 import { setTimeout } from 'node:timers/promises';
 import type { Exercise } from '../schema/types';
-import { ExerciseSchema } from '../schema/types';
+import { DEFAULT_TARGET_PATH, ExerciseSchema } from '../schema/types';
 
 type ExerciseType = Exercise['type'];
-type ExerciseDefaults = Omit<Exercise, 'type'>;
-
-type ExerciseCopy = Pick<
-  ExerciseDefaults,
-  'blurb' | 'category' | 'cue' | 'displayName' | 'weight'
+type ExerciseDefaults<T extends ExerciseType> = Omit<
+  Extract<Exercise, { type: T }>,
+  'type'
 >;
+
+type CopyKey = 'blurb' | 'category' | 'cue' | 'displayName' | 'weight';
 /** The knobs that mostly share one sensible starting point. */
-type ExerciseTuning = Omit<ExerciseDefaults, keyof ExerciseCopy>;
+type ExerciseTuning = Omit<Omit<Exercise, 'type'>, CopyKey>;
 
 /** The starting point every exercise shares; entries below override only what differs. */
 const BASE_DEFAULTS = {
@@ -21,6 +21,22 @@ const BASE_DEFAULTS = {
   speed: 3,
 } satisfies ExerciseTuning;
 
+type SharedTuningKey = keyof typeof BASE_DEFAULTS;
+
+/**
+ * Copy, plus any shared tuning worth overriding, plus whatever a specific
+ * exercise requires that the shared defaults cannot supply. That last part is
+ * what makes omitting Smooth Pursuit's path a compile error.
+ */
+type ExerciseOverride<T extends ExerciseType> = Pick<
+  ExerciseDefaults<T>,
+  CopyKey & keyof ExerciseDefaults<T>
+> &
+  Partial<
+    Pick<ExerciseDefaults<T>, SharedTuningKey & keyof ExerciseDefaults<T>>
+  > &
+  Omit<ExerciseDefaults<T>, CopyKey | SharedTuningKey>;
+
 const DEFAULT_OVERRIDES = {
   dynamic_visual_acuity: {
     blurb:
@@ -30,15 +46,6 @@ const DEFAULT_OVERRIDES = {
     displayName: 'Dynamic Visual Acuity',
     duration: 45,
     weight: 1.1,
-  },
-  horizontal_saccades: {
-    blurb:
-      'Snap your gaze between two alternating targets, head still. Trains the fast jumps your eyes make between fixations.',
-    category: 'ocular_motor',
-    cue: 'Jump your gaze to each target as it appears.',
-    displayName: 'Horizontal Saccades',
-    duration: 45,
-    weight: 0.9,
   },
   near_far_convergence: {
     blurb:
@@ -58,12 +65,24 @@ const DEFAULT_OVERRIDES = {
     duration: 30,
     weight: 1.25,
   },
+  saccades: {
+    blurb:
+      'Snap your gaze between fixed points, head still. Trains the fast jumps your eyes make between fixations.',
+    category: 'ocular_motor',
+    cue: 'Jump your gaze to each target as it appears.',
+    displayName: 'Saccades',
+    duration: 45,
+    path: DEFAULT_TARGET_PATH,
+    weight: 0.9,
+  },
   smooth_pursuit: {
     blurb:
       'Follow a target as it glides along a winding path, using your eyes only. Keep your head completely still.',
     category: 'ocular_motor',
     cue: 'Head still, follow with your eyes only.',
     displayName: 'Smooth Pursuit',
+    path: DEFAULT_TARGET_PATH,
+    speed: 5,
     weight: 0.8,
   },
   vor_x1_horizontal: {
@@ -100,7 +119,7 @@ const DEFAULT_OVERRIDES = {
     duration: 45,
     weight: 1.25,
   },
-} satisfies Record<ExerciseType, ExerciseCopy & Partial<ExerciseTuning>>;
+} satisfies { [T in ExerciseType]: ExerciseOverride<T> };
 
 const ALL_EXERCISES_DEFAULTS: Exercise[] = ExerciseSchema.array().parse(
   Object.entries(DEFAULT_OVERRIDES).map(([type, overrides]) => ({

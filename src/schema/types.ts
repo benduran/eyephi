@@ -26,6 +26,18 @@ export const ColorSchemeSchema = z.enum([
 ]);
 export type ColorScheme = z.infer<typeof ColorSchemeSchema>;
 
+export const TargetPathSchema = z.enum([
+  'horizontal',
+  'vertical',
+  'circle',
+  'ping_pong_circle',
+  'figure_eight',
+  'random',
+]);
+export type TargetPath = z.infer<typeof TargetPathSchema>;
+
+export const DEFAULT_TARGET_PATH: TargetPath = 'horizontal';
+
 /** Plain-language band a difficulty score falls into. */
 export const DifficultyBandSchema = z.enum([
   'gentle',
@@ -80,10 +92,12 @@ export const ExerciseSchema = z.discriminatedUnion('type', [
     type: z.literal('vor_x2_vertical'),
   }),
   BaseExericseSchema.extend({
+    path: TargetPathSchema,
     type: z.literal('smooth_pursuit'),
   }),
   BaseExericseSchema.extend({
-    type: z.literal('horizontal_saccades'),
+    path: TargetPathSchema,
+    type: z.literal('saccades'),
   }),
   BaseExericseSchema.extend({
     type: z.literal('near_far_convergence'),
@@ -121,11 +135,8 @@ export const ENCODED_EXERCISE_FIELDS = {
   number
 >;
 
-/**
- * The shape a shared link actually carries: only the knobs a patient tunes.
- * Copy, category and weight are rehydrated from the catalogue on decode.
- * Append new fields to the end, never reorder.
- */
+export const ENCODED_TARGET_PATH_SLOT = 6;
+
 export const EncodedExerciseSchema = z.tuple([
   // Deliberately a loose string: a link naming a retired exercise should drop
   // that one entry on decode, not fail the whole program.
@@ -135,6 +146,7 @@ export const EncodedExerciseSchema = z.tuple([
   ExerciseIntensitySchema,
   ColorSchemeSchema,
   z.boolean(),
+  TargetPathSchema.optional(),
 ]);
 export type EncodedExercise = z.infer<typeof EncodedExerciseSchema>;
 

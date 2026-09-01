@@ -12,7 +12,12 @@ import {
 } from 'react';
 import { useInterval } from 'usehooks-ts';
 import type { RunTick } from '../lib/runProgram';
-import { remainingOnStep, tickRun, toNextStep } from '../lib/runProgram';
+import {
+  remainingOnStep,
+  tickRun,
+  toNextStep,
+  toPreviousStep,
+} from '../lib/runProgram';
 import { QUERY_KEYS, uiRoutes } from '../routing/uiRoutes';
 import type { ProgramView, RunProgress } from '../schema/runProgram';
 import {
@@ -26,6 +31,7 @@ type RunProgramContextVal = {
   current: Nullish<Exercise>;
   /** Leaves the run and returns to the editor with the program intact. */
   exitRun: () => void;
+  previousStep: () => void;
   /** Fills the whole viewport, for phones held sideways. */
   immersive: boolean;
   paused: boolean;
@@ -65,7 +71,7 @@ export function RunProgramProvider({
   );
   const [immersive, setImmersive] = useQueryState(
     QUERY_KEYS.immersive,
-    parseAsBoolean.withDefault(false).withOptions({ shallow: true }),
+    parseAsBoolean.withDefault(true).withOptions({ shallow: true }),
   );
 
   /** state */
@@ -82,12 +88,9 @@ export function RunProgramProvider({
       if (tick.kind === 'idle') return;
 
       setProgress(tick.progress);
-      if (tick.kind === 'finished') {
-        setImmersive(false);
-        setView('done');
-      }
+      if (tick.kind === 'finished') setView('done');
     },
-    [setImmersive, setView],
+    [setView],
   );
 
   useInterval(
@@ -99,12 +102,11 @@ export function RunProgramProvider({
   const providerVal = useMemo<RunProgramContextVal>(
     () => ({
       current,
-      exitRun: () => {
-        setImmersive(false);
-        router.push(uiRoutes.home(exercises));
-      },
+      exitRun: () => router.push(uiRoutes.home(exercises)),
       immersive,
       paused,
+      previousStep: () =>
+        applyTick(toPreviousStep(progress, exercises, progress.totalElapsed)),
       progress,
       remaining,
       restartRun: () => {
