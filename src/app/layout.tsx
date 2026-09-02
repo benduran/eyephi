@@ -2,6 +2,7 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import type { PropsWithChildren } from 'react';
+import { Analytics } from '../components/Analytics';
 import { AppHeader } from '../components/AppHeader';
 import { Providers } from '../context/providers';
 import { THEME_BOOTSTRAP_SCRIPT } from '../lib/theme';
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
       <body className="min-h-full">
+        <Analytics />
         <Providers>
           <AppHeader />
           <div className="pt-3">{children}</div>
